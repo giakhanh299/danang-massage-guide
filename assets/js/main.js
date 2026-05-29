@@ -1,9 +1,15 @@
+const WHATSAPP_LINK = "https://wa.me/84000000000";
+const TELEGRAM_LINK = "https://t.me/";
+const MESSENGER_LINK = "https://m.me/";
+const GOOGLE_REVIEW_LINK = "https://www.google.com/maps/search/massage+da+nang";
+const TRIPADVISOR_LINK = "https://www.tripadvisor.com/Search?q=massage%20da%20nang";
+
 const LINKS = {
-  whatsapp: "#",
-  telegram: "#",
-  messenger: "#",
-  googleReview: "#",
-  tripadvisor: "#"
+  whatsapp: WHATSAPP_LINK,
+  telegram: TELEGRAM_LINK,
+  messenger: MESSENGER_LINK,
+  googleReview: GOOGLE_REVIEW_LINK,
+  tripadvisor: TRIPADVISOR_LINK
 };
 
 const EXTERNAL_LINK_KEYS = new Set([
