@@ -1,5 +1,5 @@
-const WHATSAPP_LINK = "https://wa.me/84000000000";
-const TELEGRAM_LINK = "https://t.me/";
+const WHATSAPP_LINK = "https://chat.whatsapp.com/Bzeox4jUrZdBQFWaLS20l3";
+const TELEGRAM_LINK = "https://t.me/danangmassagebooking";
 const MESSENGER_LINK = "https://m.me/";
 const GOOGLE_REVIEW_LINK = "https://www.google.com/maps/search/massage+da+nang";
 const TRIPADVISOR_LINK = "https://www.tripadvisor.com/Search?q=massage%20da%20nang";
