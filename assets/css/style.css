@@ -367,6 +367,14 @@ p {
   height: 100%;
 }
 
+.inline-link {
+  color: var(--brand);
+  font-weight: 800;
+  text-decoration: underline;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.16em;
+}
+
 .hero-actions,
 .review-links,
 .stack-actions,
@@ -391,6 +399,27 @@ p {
   display: grid;
   gap: 0.65rem;
   margin-top: 1.25rem;
+}
+
+.guide-link-grid,
+.area-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.guide-link-card,
+.area-card {
+  display: block;
+  padding: 1.5rem;
+  border: 1px solid rgba(23, 55, 46, 0.08);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+.guide-link-card h3,
+.area-card h3 {
+  margin-bottom: 0.75rem;
 }
 
 .support-card {
@@ -543,6 +572,12 @@ p {
   padding: 1.5rem;
 }
 
+.spotlight-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
 .spotlight-badge {
   display: inline-flex;
   margin-bottom: 0.9rem;
@@ -560,6 +595,37 @@ p {
   margin: 0.4rem 0 0.9rem;
   color: var(--brand);
   font-weight: 700;
+}
+
+.price-line {
+  margin: 0;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.photo-placeholder {
+  display: grid;
+  gap: 0.4rem;
+  min-height: 12rem;
+  padding: 1rem;
+  border: 1px dashed rgba(23, 55, 46, 0.2);
+  border-radius: 22px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.78), rgba(244, 236, 223, 0.72)),
+    rgba(255, 255, 255, 0.72);
+  place-items: center;
+  text-align: center;
+}
+
+.photo-placeholder span {
+  color: var(--brand);
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.photo-placeholder p {
+  margin-bottom: 0;
+  font-size: 0.92rem;
 }
 
 .tag-list {
@@ -581,6 +647,10 @@ p {
 
 .review-strip {
   align-items: center;
+}
+
+.card-actions {
+  margin-top: auto;
 }
 
 .table-wrap {
@@ -890,6 +960,11 @@ p {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .guide-link-grid,
+  .area-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .review-strip,
   .split-layout,
   .booking-layout,
@@ -912,6 +987,8 @@ p {
     display: flex;
     flex-direction: row;
     align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
     gap: 0.35rem;
     padding: 0;
     border: 0;
