@@ -641,6 +641,17 @@ p {
   margin: 1.2rem 0 1.4rem;
 }
 
+.booking-steps {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.booking-steps li + li {
+  margin-top: 0.5rem;
+}
+
 .tag-list li {
   padding: 0.5rem 0.8rem;
   border-radius: 999px;
