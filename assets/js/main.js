@@ -37,6 +37,19 @@ function formatRating(value) {
   return Number(value).toFixed(1);
 }
 
+function formatReviewCount(value) {
+  if (typeof value === "string") {
+    return value;
+  }
+
+  return new Intl.NumberFormat("en-US").format(Number(value));
+}
+
+function buildMapsUrl(name, address) {
+  const query = [name, address].filter(Boolean).join(" ");
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+}
+
 function applyConfiguredLinks(root = document) {
   root.querySelectorAll("[data-link-key]").forEach((element) => {
     const key = element.dataset.linkKey;
@@ -80,37 +93,83 @@ function renderSpaCard(spa) {
   `;
 }
 
-async function renderSpaGrids() {
-  const spaGrids = document.querySelectorAll("[data-spa-grid]");
+function renderListingCard(item, kind) {
+  const area = item.area || "Da Nang";
+  const mapsUrl = item.mapsUrl || buildMapsUrl(item.name, item.address);
+  const rating = typeof item.rating === "number" ? formatRating(item.rating) : item.rating || "";
+  const reviewCount = formatReviewCount(item.reviews);
 
-  if (!spaGrids.length) {
+  if (kind === "spa") {
+    return renderSpaCard(item);
+  }
+
+  return `
+    <article class="spotlight-card">
+      <span class="spotlight-badge">${escapeHtml(area)}</span>
+      <h3>${escapeHtml(item.name || "")}</h3>
+      <p class="spotlight-area">${escapeHtml(item.address || "")}</p>
+      <p class="spotlight-meta">${escapeHtml(item.type || "")} | Google rating ${escapeHtml(rating)} / 5 from ${escapeHtml(reviewCount)} reviews</p>
+      <p>${escapeHtml(item.description || "")}</p>
+      <div class="card-actions">
+        <a class="button button-secondary button-small" href="${escapeHtml(mapsUrl)}" target="_blank" rel="noopener noreferrer">Google Maps</a>
+      </div>
+    </article>
+  `;
+}
+
+async function renderDataDrivenGrids() {
+  const listingGrids = document.querySelectorAll("[data-listing-grid]");
+
+  if (!listingGrids.length) {
     return;
   }
 
   try {
-    const response = await fetch("data/spas.json", { cache: "no-store" });
-    if (!response.ok) {
-      throw new Error(`Failed to load spa data (${response.status})`);
-    }
+    const sources = {
+      spas: "data/spas.json",
+      karaoke: "data/karaoke.json",
+      barsclubs: "data/bars-clubs.json",
+      seafoodbeer: "data/seafood-beer.json"
+    };
 
-    const payload = await response.json();
-    const spas = Array.isArray(payload) ? payload : payload.spas || [];
+    const cache = {};
 
-    spaGrids.forEach((grid) => {
-      const limit = Number(grid.dataset.spaLimit || 0);
-      const items = limit > 0 ? spas.slice(0, limit) : spas;
-      grid.innerHTML = items.map(renderSpaCard).join("");
+    for (const grid of listingGrids) {
+      const sourceKey = grid.dataset.listingSource || "spas";
+      const sourceUrl = sources[sourceKey];
+      const kind = grid.dataset.listingKind || (sourceKey === "spas" ? "spa" : "listing");
+
+      if (!sourceUrl) {
+        grid.innerHTML = `<p class="fine-print">Listing source is not configured.</p>`;
+        continue;
+      }
+
+      if (!cache[sourceKey]) {
+        const response = await fetch(sourceUrl, { cache: "no-store" });
+        if (!response.ok) {
+          throw new Error(`Failed to load listing data from ${sourceUrl} (${response.status})`);
+        }
+
+        cache[sourceKey] = await response.json();
+      }
+
+      const payload = cache[sourceKey];
+      const items = Array.isArray(payload) ? payload : payload.items || payload.spas || [];
+      const limit = Number(grid.dataset.listingLimit || 0);
+      const subset = limit > 0 ? items.slice(0, limit) : items;
+
+      grid.innerHTML = subset.map((item) => renderListingCard(item, kind)).join("");
       applyConfiguredLinks(grid);
-    });
+    }
   } catch (error) {
-    spaGrids.forEach((grid) => {
-      grid.innerHTML = `<p class="fine-print">Spa data could not be loaded right now. Please refresh the page or try again later.</p>`;
+    listingGrids.forEach((grid) => {
+      grid.innerHTML = `<p class="fine-print">Listing data could not be loaded right now. Please refresh the page or try again later.</p>`;
     });
   }
 }
 
 applyConfiguredLinks();
-renderSpaGrids();
+renderDataDrivenGrids();
 
 document.querySelectorAll("[data-current-year]").forEach((element) => {
   element.textContent = new Date().getFullYear();

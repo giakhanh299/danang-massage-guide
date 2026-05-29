@@ -1,0 +1,44 @@
+{
+  "items": [
+    {
+      "name": "Queen Palace Karaoke Da Nang",
+      "area": "Cam Le",
+      "address": "179 Xo Viet Nghe Tinh, Da Nang",
+      "rating": 4.9,
+      "reviews": "1278+",
+      "type": "Karaoke bar",
+      "description": "Premium karaoke venue with private rooms, suitable for groups and celebrations.",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Queen%20Palace%20Karaoke%20Da%20Nang%20179%20Xo%20Viet%20Nghe%20Tinh"
+    },
+    {
+      "name": "BMW Korean Karaoke Da Nang",
+      "area": "An Hai",
+      "address": "29-31 Le Van Quy, Da Nang",
+      "rating": 4.7,
+      "reviews": "207+",
+      "type": "Korean-style karaoke",
+      "description": "Korean-style karaoke option for travelers looking for private-room entertainment.",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=BMW%20Korean%20Karaoke%20Da%20Nang%2029-31%20Le%20Van%20Quy"
+    },
+    {
+      "name": "NEW Eden Karaoke Da Nang",
+      "area": "Hoa Cuong",
+      "address": "Duy Tan, Hoa Cuong, Da Nang",
+      "rating": 4.9,
+      "reviews": "603+",
+      "type": "Karaoke bar",
+      "description": "Popular karaoke option with strong visibility among Korean visitors.",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=NEW%20Eden%20Karaoke%20Da%20Nang%20Duy%20Tan%20Hoa%20Cuong"
+    },
+    {
+      "name": "NooRe Box Music Box and Mart",
+      "area": "Hai Chau",
+      "address": "36 Ba Dinh, Da Nang",
+      "rating": 4.9,
+      "reviews": "493+",
+      "type": "Music box / video karaoke",
+      "description": "Budget-friendly music box and karaoke-style venue for small groups.",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=NooRe%20Box%20Music%20Box%20and%20Mart%2036%20Ba%20Dinh%20Da%20Nang"
+    }
+  ]
+}

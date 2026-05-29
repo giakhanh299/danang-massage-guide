@@ -1,0 +1,34 @@
+{
+  "items": [
+    {
+      "name": "Hai San Moc Quan Da Nang",
+      "area": "An Hai",
+      "address": "26 To Hien Thanh, Da Nang",
+      "rating": 4.8,
+      "reviews": "23614+",
+      "type": "Seafood restaurant",
+      "description": "Very popular seafood restaurant with a large number of tourist reviews.",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Hai%20San%20Moc%20Quan%20Da%20Nang%2026%20To%20Hien%20Thanh"
+    },
+    {
+      "name": "Them Hai San",
+      "area": "An Hai / My Khe",
+      "address": "39 Tran Bach Dang, Da Nang",
+      "rating": 4.8,
+      "reviews": "9112+",
+      "type": "Seafood restaurant",
+      "description": "Seafood restaurant near the beach area with strong tourist visibility.",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Them%20Hai%20San%2039%20Tran%20Bach%20Dang%20Da%20Nang"
+    },
+    {
+      "name": "Lang Cua Seafood",
+      "area": "Ngu Hanh Son",
+      "address": "33 Phan Ton, Da Nang",
+      "rating": 4.7,
+      "reviews": "591+",
+      "type": "Seafood restaurant",
+      "description": "Seafood spot near the An Thuong / Ngu Hanh Son area.",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Lang%20Cua%20Seafood%2033%20Phan%20Ton%20Da%20Nang"
+    }
+  ]
+}

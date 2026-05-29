@@ -1,0 +1,64 @@
+{
+  "items": [
+    {
+      "name": "The Keepsake Bar",
+      "area": "Hai Chau",
+      "address": "56A Le Hong Phong, Da Nang",
+      "rating": 5.0,
+      "reviews": "120+",
+      "type": "Cocktail bar",
+      "description": "Craft cocktail and speakeasy-style bar in central Da Nang.",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=The%20Keepsake%20Bar%2056A%20Le%20Hong%20Phong%20Da%20Nang"
+    },
+    {
+      "name": "Van Cocktail Bar",
+      "area": "An Hai / My Khe",
+      "address": "17 Tran Bach Dang, Da Nang",
+      "rating": 4.9,
+      "reviews": "1390+",
+      "type": "Cocktail bar",
+      "description": "Popular cocktail bar near the beach area, suitable for tourists and couples.",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Van%20Cocktail%20Bar%2017%20Tran%20Bach%20Dang%20Da%20Nang"
+    },
+    {
+      "name": "Linger Bespoke Cocktail Bar",
+      "area": "Hai Chau",
+      "address": "58 Pham Ngoc Thach, Da Nang",
+      "rating": 4.9,
+      "reviews": "292+",
+      "type": "Cocktail bar",
+      "description": "Bespoke cocktail bar with a relaxed evening atmosphere.",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Linger%20Bespoke%20Cocktail%20Bar%2058%20Pham%20Ngoc%20Thach%20Da%20Nang"
+    },
+    {
+      "name": "New Phuong Dong",
+      "area": "Hai Chau",
+      "address": "20 Dong Da, Da Nang",
+      "rating": 4.3,
+      "reviews": "2265+",
+      "type": "Night club",
+      "description": "One of Da Nang's best-known nightclubs for late-night entertainment.",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=New%20Phuong%20Dong%2020%20Dong%20Da%20Da%20Nang"
+    },
+    {
+      "name": "OQ Club",
+      "area": "Hai Chau / Bach Dang",
+      "address": "18-20 Bach Dang, Da Nang",
+      "rating": 4.4,
+      "reviews": "1425+",
+      "type": "Disco club",
+      "description": "Central riverside club option for nightlife visitors.",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=OQ%20Club%2018-20%20Bach%20Dang%20Da%20Nang"
+    },
+    {
+      "name": "For You Club",
+      "area": "Hoa Cuong",
+      "address": "52-55 Tran Van Tru, Da Nang",
+      "rating": 4.8,
+      "reviews": "1562+",
+      "type": "Night club",
+      "description": "Large club venue for groups and late-night entertainment.",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=For%20You%20Club%2052-55%20Tran%20Van%20Tru%20Da%20Nang"
+    }
+  ]
+}
