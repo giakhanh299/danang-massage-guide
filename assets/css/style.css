@@ -268,6 +268,8 @@ p {
   border-radius: 22px;
   background: rgba(255, 252, 247, 0.98);
   box-shadow: var(--shadow);
+  max-height: calc(100vh - 7rem);
+  overflow: auto;
 }
 
 .site-nav.is-open {
@@ -279,6 +281,10 @@ p {
   border-radius: 999px;
   font-weight: 700;
   color: var(--brand);
+}
+
+.site-nav a.button-small {
+  justify-content: center;
 }
 
 .site-nav a.is-active {
@@ -619,6 +625,18 @@ p {
   margin: 0.4rem 0 0.9rem;
   color: var(--brand);
   font-weight: 700;
+}
+
+.spotlight-subline {
+  margin: -0.25rem 0 0.7rem;
+  color: var(--text-soft);
+  font-size: 0.95rem;
+}
+
+.rating-line {
+  margin: 0;
+  color: var(--brand);
+  font-weight: 800;
 }
 
 .price-line {
@@ -1035,6 +1053,8 @@ p {
     border: 0;
     background: transparent;
     box-shadow: none;
+    max-height: none;
+    overflow: visible;
   }
 
   .site-nav a {

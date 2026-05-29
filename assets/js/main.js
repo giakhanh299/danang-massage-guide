@@ -70,6 +70,9 @@ function applyConfiguredLinks(root = document) {
 
 function renderSpaCard(spa) {
   const services = Array.isArray(spa.topServices) ? spa.topServices : [];
+  const area = spa.area || "Da Nang";
+  const rating = Number(spa.googleRating);
+  const reviewCount = formatCount(spa.reviewCount);
 
   return `
     <article class="spotlight-card">
@@ -77,10 +80,12 @@ function renderSpaCard(spa) {
         <span>${escapeHtml(spa.imageLabel || "Future Spa Photo")}</span>
         <p>${escapeHtml(spa.imageDescription || spa.officialName)}</p>
       </div>
-      <span class="spotlight-badge">${escapeHtml(spa.area || "Da Nang")}</span>
+      <span class="spotlight-badge">${escapeHtml(area)}</span>
       <h3>${escapeHtml(spa.officialName)}</h3>
-      <p class="spotlight-area">${escapeHtml(spa.address || "")}</p>
-      <p class="spotlight-meta">${escapeHtml(spa.openingHours || "")} | Google rating ${escapeHtml(formatRating(spa.googleRating))} / 5 from ${formatCount(spa.reviewCount)} reviews</p>
+      <p class="spotlight-area"><strong>Area:</strong> ${escapeHtml(area)}</p>
+      <p class="spotlight-subline">${escapeHtml(spa.address || "")}</p>
+      <p class="rating-line"><strong>Rating:</strong> ${escapeHtml(formatRating(rating))} / 5 from ${reviewCount} reviews</p>
+      <p class="spotlight-meta"><strong>Hours:</strong> ${escapeHtml(spa.openingHours || "Check before visiting")}</p>
       <p class="price-line"><strong>Price range:</strong> ${escapeHtml(spa.priceRange || "")}</p>
       <p>${escapeHtml(spa.description || "")}</p>
       ${services.length ? `<ul class="tag-list">${services.map((service) => `<li>${escapeHtml(service)}</li>`).join("")}</ul>` : ""}
@@ -98,6 +103,7 @@ function renderListingCard(item, kind) {
   const mapsUrl = item.mapsUrl || buildMapsUrl(item.name, item.address);
   const rating = typeof item.rating === "number" ? formatRating(item.rating) : item.rating || "";
   const reviewCount = formatReviewCount(item.reviews);
+  const websiteUrl = item.website || "";
 
   if (kind === "spa") {
     return renderSpaCard(item);
@@ -107,11 +113,14 @@ function renderListingCard(item, kind) {
     <article class="spotlight-card">
       <span class="spotlight-badge">${escapeHtml(area)}</span>
       <h3>${escapeHtml(item.name || "")}</h3>
-      <p class="spotlight-area">${escapeHtml(item.address || "")}</p>
-      <p class="spotlight-meta">${escapeHtml(item.type || "")} | Google rating ${escapeHtml(rating)} / 5 from ${escapeHtml(reviewCount)} reviews</p>
+      <p class="spotlight-area"><strong>Area:</strong> ${escapeHtml(area)}</p>
+      <p class="spotlight-subline">${escapeHtml(item.address || "")}</p>
+      <p class="rating-line"><strong>Rating:</strong> ${escapeHtml(rating)} / 5 from ${escapeHtml(reviewCount)} reviews</p>
+      <p class="spotlight-meta"><strong>Type:</strong> ${escapeHtml(item.type || "")}</p>
       <p>${escapeHtml(item.description || "")}</p>
       <div class="card-actions">
         <a class="button button-secondary button-small" href="${escapeHtml(mapsUrl)}" target="_blank" rel="noopener noreferrer">Google Maps</a>
+        ${websiteUrl ? `<a class="button button-secondary button-small" href="${escapeHtml(websiteUrl)}" target="_blank" rel="noopener noreferrer">Website</a>` : ""}
       </div>
     </article>
   `;
