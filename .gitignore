@@ -1,2 +1,3 @@
 .wrangler/
 runtime/google_sheet_templates/
+**/__pycache__/

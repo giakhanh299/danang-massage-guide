@@ -54,11 +54,25 @@ function notFound() {
   );
 }
 
+function getRuntimeConfigFlags(env) {
+  return {
+    telegramConfigured: Boolean(env?.TELEGRAM_BOT_TOKEN),
+    openaiConfigured: Boolean(env?.OPENAI_API_KEY),
+    sheetsConfigured: Boolean(env?.GOOGLE_SERVICE_ACCOUNT_JSON && env?.GOOGLE_SHEET_ID)
+  };
+}
+
 export default {
   async fetch(request, env, ctx) {
     configureAgentCore(env);
     const url = new URL(request.url);
     const storage = createStorage(env);
+    const runtimeFlags = getRuntimeConfigFlags(env);
+
+    if (!globalThis.__AGENT_CORE_DIAGNOSTICS_LOGGED) {
+      console.log("agent-core diagnostics", runtimeFlags);
+      globalThis.__AGENT_CORE_DIAGNOSTICS_LOGGED = true;
+    }
 
     if (request.method === "OPTIONS") {
       return jsonResponse(null, 204);
@@ -66,6 +80,10 @@ export default {
 
     if (request.method === "GET" && url.pathname === "/health") {
       return jsonResponse({ status: "ok" });
+    }
+
+    if (request.method === "GET" && url.pathname === "/debug/config") {
+      return jsonResponse(runtimeFlags);
     }
 
     if (request.method === "GET" && url.pathname === "/admin/stats") {
