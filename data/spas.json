@@ -1,0 +1,120 @@
+{
+  "spas": [
+    {
+      "slug": "levenin-spa-da-nang",
+      "officialName": "Levénin Spa Da Nang",
+      "area": "My Khe / Son Tra",
+      "address": "231 D. Dinh Nghe, An Hai Bac, Son Tra, Da Nang",
+      "openingHours": "08:00 AM - 12:00 AM",
+      "googleRating": 4.9,
+      "reviewCount": 3010,
+      "website": "https://leveninspadanang.com/",
+      "phone": "+84 794 510 520",
+      "priceRange": "320,000 - 1,120,000 VND",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Levenin%20Spa%20Da%20Nang%20231%20Dinh%20Nghe%20Da%20Nang",
+      "imageLabel": "Future Spa Photo",
+      "imageDescription": "Exterior, reception, or treatment room for Levénin Spa Da Nang.",
+      "description": "Levénin Spa Da Nang is a polished Son Tra option for travelers who want a calm, well-reviewed spa close to My Khe Beach. The venue is known for bamboo massage, aroma oil therapy, and a tidy interior that feels easy to trust on a first visit. English-friendly communication, clear menu pricing, and a simple booking flow make it practical for foreign visitors who want a premium-feeling wellness stop without leaving the beach side of the city.",
+      "topServices": [
+        "Aroma Oil Massage",
+        "Thai Dry Massage",
+        "Bamboo Massage",
+        "Foot Massage",
+        "Face Massage"
+      ]
+    },
+    {
+      "slug": "silk-spa-an-thuong",
+      "officialName": "Silk Spa An Thuong",
+      "area": "An Thuong",
+      "address": "Lot 32 An Thuong 4, Bac My Phu, Ngu Hanh Son, Da Nang",
+      "openingHours": "Open daily 10:00 AM - 10:30 PM",
+      "googleRating": 4.8,
+      "reviewCount": 2500,
+      "website": "https://silkspadanang.com/en/",
+      "phone": "+84 869 970 567",
+      "priceRange": "130,000 - 490,000 VND",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Silk%20Spa%20An%20Thuong%20Lot%2032%20An%20Thuong%204%20Da%20Nang",
+      "imageLabel": "Future Spa Photo",
+      "imageDescription": "Exterior, reception, or treatment room for Silk Spa An Thuong.",
+      "description": "Silk Spa An Thuong is a convenient choice for beach-area visitors who value walkable access, a relaxed atmosphere, and straightforward pricing. Its An Thuong location works well for tourists staying near cafes, restaurants, and hotel clusters on the My Khe side of Da Nang. The menu covers simple foot massage sessions, traditional body work, and hot stone options, making it a flexible stop for guests who want a clean, easy-to-book spa near their evening plans.",
+      "topServices": [
+        "Relax Massage",
+        "Hot Stone Massage",
+        "Traditional Massage",
+        "Pregnancy Massage",
+        "Foot Massage"
+      ]
+    },
+    {
+      "slug": "sen-spa-da-nang",
+      "officialName": "SEN SPA Da Nang",
+      "area": "Hai Chau / Han River",
+      "address": "21 Thai Phien Street, Phuoc Ninh Ward, Hai Chau District, Da Nang",
+      "openingHours": "Open daily 10:00 AM - 09:00 PM",
+      "googleRating": 5,
+      "reviewCount": 479,
+      "website": "https://senspadanang.com/",
+      "phone": "+84 976 591 515",
+      "priceRange": "290,000 - 1,550,000 VND",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=SEN%20SPA%20Da%20Nang%2021%20Thai%20Phien",
+      "imageLabel": "Future Spa Photo",
+      "imageDescription": "Exterior, reception, or treatment room for SEN SPA Da Nang.",
+      "description": "SEN SPA Da Nang is a strong central option for travelers who want massage convenience near the Han River and Hai Chau dining areas. The spa is set up for easy booking, clear menus, and a calm atmosphere that suits both solo visitors and couples. Guests often choose the signature combo packages, deep tissue work, or relaxing body massage before heading into a downtown dinner or an evening walk, which makes it a smart city-center choice.",
+      "topServices": [
+        "Sen Signature 4-in-1",
+        "Deep Tissue Massage",
+        "Vietnam Body Massage",
+        "Foot Massage",
+        "Body Scrub"
+      ]
+    },
+    {
+      "slug": "tran-thao-spa-da-nang",
+      "officialName": "Tran Thao Spa Da Nang",
+      "area": "My Khe / Son Tra",
+      "address": "76 An Hai Dong 1, Son Tra, Da Nang, Vietnam",
+      "openingHours": "Monday - Sunday: 9:00 AM - 9:00 PM",
+      "googleRating": 4.8,
+      "reviewCount": 127,
+      "website": "https://tranthaospa.com/en",
+      "phone": "+84 905 503 413",
+      "priceRange": "99,000 - 599,000 VND",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Tran%20Thao%20Spa%2076%20An%20Hai%20Dong%201%20Da%20Nang",
+      "imageLabel": "Future Spa Photo",
+      "imageDescription": "Exterior, reception, or treatment room for Tran Thao Spa Da Nang.",
+      "description": "Tran Thao Spa Da Nang combines massage, herbal hair wash, and body-care services in a way that works especially well for travelers who want several relaxation options in one place. The spa is easy to reach from My Khe and the wider Son Tra area, and its menu is broad enough for visitors who want a quick neck-and-shoulder treatment or a longer oil massage. It is a practical choice for guests who value variety, natural products, and easy city access.",
+      "topServices": [
+        "Nourishing Hair Wash",
+        "Neck & Shoulder Massage",
+        "Foot Massage",
+        "Oil Massage",
+        "Oil + Hot Stone Massage"
+      ]
+    },
+    {
+      "slug": "herbal-spa-da-nang",
+      "officialName": "Herbal Spa Da Nang",
+      "area": "Son Tra",
+      "address": "201 D. Dinh Nghe, An Hai Bac, Son Tra, Da Nang, Vietnam",
+      "openingHours": "Daily 8:30 AM - 10:00 PM",
+      "googleRating": 4.9,
+      "reviewCount": 7040,
+      "website": "https://herbalspa.vn/en/",
+      "phone": "+84 901 825 789",
+      "priceRange": "350,000 - 1,350,000 VND",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Herbal%20Spa%20201%20Dinh%20Nghe%20Da%20Nang",
+      "imageLabel": "Future Spa Photo",
+      "imageDescription": "Exterior, reception, or treatment room for Herbal Spa Da Nang.",
+      "description": "Herbal Spa Da Nang is a large, well-established wellness brand with a strong reputation among international travelers. The Son Tra branch offers a broad menu that includes herbal shampoo, deep tissue massage, body scrub, facial treatment, and premium four-hand options. Guests like it for the polished atmosphere, consistent service, and helpful branch system across Da Nang and Hoi An. It is a strong fit for travelers who want a recognized spa brand with a broad treatment menu and a more premium feel.",
+      "topServices": [
+        "Relaxation Massage",
+        "Deep Tissue Massage",
+        "Aromatherapy",
+        "Body Scrub & Wrap",
+        "Four-Hands Harmony",
+        "Herbal Wellness Shampoo"
+      ]
+    }
+  ]
+}

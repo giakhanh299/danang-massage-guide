@@ -20,21 +20,97 @@ const EXTERNAL_LINK_KEYS = new Set([
   "tripadvisor"
 ]);
 
-document.querySelectorAll("[data-link-key]").forEach((element) => {
-  const key = element.dataset.linkKey;
-  const href = LINKS[key];
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
 
-  if (!href) {
+function formatCount(value) {
+  return new Intl.NumberFormat("en-US").format(Number(value));
+}
+
+function formatRating(value) {
+  return Number(value).toFixed(1);
+}
+
+function applyConfiguredLinks(root = document) {
+  root.querySelectorAll("[data-link-key]").forEach((element) => {
+    const key = element.dataset.linkKey;
+    const href = LINKS[key];
+
+    if (!href) {
+      return;
+    }
+
+    element.setAttribute("href", href);
+
+    if (EXTERNAL_LINK_KEYS.has(key)) {
+      element.setAttribute("target", "_blank");
+      element.setAttribute("rel", "noopener noreferrer");
+    }
+  });
+}
+
+function renderSpaCard(spa) {
+  const services = Array.isArray(spa.topServices) ? spa.topServices : [];
+
+  return `
+    <article class="spotlight-card">
+      <div class="photo-placeholder">
+        <span>${escapeHtml(spa.imageLabel || "Future Spa Photo")}</span>
+        <p>${escapeHtml(spa.imageDescription || spa.officialName)}</p>
+      </div>
+      <span class="spotlight-badge">${escapeHtml(spa.area || "Da Nang")}</span>
+      <h3>${escapeHtml(spa.officialName)}</h3>
+      <p class="spotlight-area">${escapeHtml(spa.address || "")}</p>
+      <p class="spotlight-meta">${escapeHtml(spa.openingHours || "")} | Google rating ${escapeHtml(formatRating(spa.googleRating))} / 5 from ${formatCount(spa.reviewCount)} reviews</p>
+      <p class="price-line"><strong>Price range:</strong> ${escapeHtml(spa.priceRange || "")}</p>
+      <p>${escapeHtml(spa.description || "")}</p>
+      ${services.length ? `<ul class="tag-list">${services.map((service) => `<li>${escapeHtml(service)}</li>`).join("")}</ul>` : ""}
+      <div class="card-actions">
+        <a class="button button-secondary button-small" href="${escapeHtml(spa.mapsUrl || "#")}" target="_blank" rel="noopener noreferrer">Google Maps</a>
+        ${spa.website ? `<a class="button button-secondary button-small" href="${escapeHtml(spa.website)}" target="_blank" rel="noopener noreferrer">Website</a>` : ""}
+        <a class="button button-small" data-link-key="whatsapp" href="#">Book via WhatsApp</a>
+      </div>
+    </article>
+  `;
+}
+
+async function renderSpaGrids() {
+  const spaGrids = document.querySelectorAll("[data-spa-grid]");
+
+  if (!spaGrids.length) {
     return;
   }
 
-  element.setAttribute("href", href);
+  try {
+    const response = await fetch("data/spas.json", { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error(`Failed to load spa data (${response.status})`);
+    }
 
-  if (EXTERNAL_LINK_KEYS.has(key)) {
-    element.setAttribute("target", "_blank");
-    element.setAttribute("rel", "noopener noreferrer");
+    const payload = await response.json();
+    const spas = Array.isArray(payload) ? payload : payload.spas || [];
+
+    spaGrids.forEach((grid) => {
+      const limit = Number(grid.dataset.spaLimit || 0);
+      const items = limit > 0 ? spas.slice(0, limit) : spas;
+      grid.innerHTML = items.map(renderSpaCard).join("");
+      applyConfiguredLinks(grid);
+    });
+  } catch (error) {
+    spaGrids.forEach((grid) => {
+      grid.innerHTML = `<p class="fine-print">Spa data could not be loaded right now. Please refresh the page or try again later.</p>`;
+    });
   }
-});
+}
+
+applyConfiguredLinks();
+renderSpaGrids();
 
 document.querySelectorAll("[data-current-year]").forEach((element) => {
   element.textContent = new Date().getFullYear();
