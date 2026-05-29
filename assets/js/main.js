@@ -68,6 +68,47 @@ function applyConfiguredLinks(root = document) {
   });
 }
 
+function injectInsiderGuideFunnel(root = document) {
+  const nav = root.querySelector(".site-nav");
+
+  if (nav && !nav.querySelector('a[href="insider-guide.html"]')) {
+    const insiderGuideLink = root.createElement("a");
+    insiderGuideLink.setAttribute("href", "insider-guide.html");
+    insiderGuideLink.textContent = "Insider Guide";
+    nav.insertBefore(
+      insiderGuideLink,
+      nav.querySelector('a[href="contact.html"]') || nav.querySelector('[data-link-key="whatsapp"]') || null
+    );
+  }
+
+  if (root.querySelector("#telegram-funnel-banner")) {
+    return;
+  }
+
+  const footer = root.querySelector(".site-footer");
+
+  if (!footer || !footer.parentNode) {
+    return;
+  }
+
+  const banner = root.createElement("section");
+  banner.id = "telegram-funnel-banner";
+  banner.className = "section cta-band telegram-funnel-band";
+  banner.innerHTML = `
+    <div class="container cta-band-shell">
+      <div>
+        <p class="eyebrow">Need local tips in Da Nang?</p>
+        <h2>Join our free Telegram group for massage, nightlife, seafood, and booking support.</h2>
+      </div>
+      <div class="cta-band-actions">
+        <a class="button" data-link-key="telegram" href="#">Join Telegram</a>
+      </div>
+    </div>
+  `;
+
+  footer.parentNode.insertBefore(banner, footer);
+}
+
 function renderSpaCard(spa) {
   const services = Array.isArray(spa.topServices) ? spa.topServices : [];
   const area = spa.area || "Da Nang";
@@ -177,6 +218,7 @@ async function renderDataDrivenGrids() {
   }
 }
 
+injectInsiderGuideFunnel();
 applyConfiguredLinks();
 renderDataDrivenGrids();
 
