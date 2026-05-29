@@ -90,6 +90,46 @@ function buildRateLimitReply() {
   ].join("\n");
 }
 
+function isAdminUser(env, userId) {
+  const raw = String(env.TELEGRAM_ADMIN_IDS || env.TELEGRAM_ADMIN_USER_IDS || "");
+  const ids = raw
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  return ids.includes(String(userId));
+}
+
+function formatStatsText(stats) {
+  const questions = Array.isArray(stats.top_questions) ? stats.top_questions.slice(0, 5) : [];
+  const categories = Array.isArray(stats.top_categories) ? stats.top_categories.slice(0, 5) : [];
+
+  return [
+    `Customers: ${stats.total_customers || 0}`,
+    `Leads: ${stats.total_leads || 0}`,
+    `Bookings: ${stats.total_bookings || 0}`,
+    "",
+    "Top questions:",
+    ...(questions.length ? questions.map((item, index) => `${index + 1}. ${item.question}`) : ["No FAQ data yet."]),
+    "",
+    "Top categories:",
+    ...(categories.length ? categories.map((item, index) => `${index + 1}. ${item.category} (${item.count})`) : ["No lead data yet."]),
+    "",
+    "For quick help, join: https://t.me/danangmassagebooking",
+    "Booking support: https://chat.whatsapp.com/Bzeox4jUrZdBQFWaLS20l3",
+    "View website: https://danang-massage-guide.pages.dev/"
+  ].join("\n");
+}
+
+function formatRecentRows(title, rows, mapper) {
+  const entries = Array.isArray(rows) ? rows.slice(0, 10) : [];
+  const body = entries.length
+    ? entries.map((row, index) => `${index + 1}. ${mapper(row)}`).join("\n")
+    : "No rows yet.";
+
+  return `${title}\n${body}\n\nFor quick help, join: https://t.me/danangmassagebooking\nBooking support: https://chat.whatsapp.com/Bzeox4jUrZdBQFWaLS20l3`;
+}
+
 export async function handleTelegramWebhook(request, env, storage, ctx) {
   const update = await request.json();
   const parts = getMessageParts(update);
@@ -124,6 +164,43 @@ export async function handleTelegramWebhook(request, env, storage, ctx) {
 
   const [faq, promptRules] = await Promise.all([storage.getFAQ(), storage.getPromptRules()]);
   configureAgentCore(env, { faq, promptRules });
+
+  if (command === "/stats" || command === "/leads" || command === "/bookings") {
+    if (!isAdminUser(env, parts.userId)) {
+      const reply = "This command is admin-only.";
+      await sendTelegramMessage(env, parts.chatId, reply);
+      return new Response(JSON.stringify({ ok: false, unauthorized: true }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    let reply = "";
+
+    if (command === "/stats") {
+      const stats = await storage.getAdminStats();
+      reply = formatStatsText(stats);
+    } else if (command === "/leads") {
+      const leads = await storage.getRecentLeads(10);
+      reply = formatRecentRows(
+        "Recent leads:",
+        leads,
+        (row) => `${row.timestamp || "unknown"} | ${row.channel || "unknown"} | ${row.userName || row.userId || "unknown"} | ${row.detectedIntent || "general"} | ${row.message || ""}`
+      );
+    } else {
+      const bookings = await storage.getRecentBookings(10);
+      reply = formatRecentRows(
+        "Recent bookings:",
+        bookings,
+        (row) => `${row.timestamp || "unknown"} | ${row.channel || "unknown"} | ${row.userName || row.userId || "unknown"} | ${row.requestedService || row.detectedIntent || "booking"} | ${row.requestedArea || ""}`
+      );
+    }
+
+    await sendTelegramMessage(env, parts.chatId, reply);
+    return new Response(JSON.stringify({ ok: true, adminCommand: command }), {
+      headers: { "Content-Type": "application/json" }
+    });
+  }
 
   const commandMessage = getCommandMessage(parts.messageText);
   const history = await storage.getConversationHistory("telegram", parts.userId, 12);

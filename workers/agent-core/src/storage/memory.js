@@ -21,6 +21,48 @@ const DEFAULT_PROMPT_RULES = [
   "Always include Telegram, WhatsApp, and website next steps."
 ];
 
+function buildTopQuestions(faqRows, limit = 5) {
+  return faqRows
+    .slice(0, limit)
+    .map((row) => ({
+      question: row.question,
+      answer: row.answer,
+      category: row.category || "general"
+    }));
+}
+
+function buildTopCategories(leads, limit = 5) {
+  const counts = new Map();
+
+  for (const lead of leads) {
+    const key = String(lead.detectedIntent || "general");
+    counts.set(key, (counts.get(key) || 0) + 1);
+  }
+
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([category, count]) => ({ category, count }));
+}
+
+function buildAdminStats(customers, leads, bookingRequests, faq) {
+  const customerCount = typeof customers?.size === "number"
+    ? customers.size
+    : Array.isArray(customers)
+      ? customers.length
+      : Number(customers || 0);
+  const leadCount = Array.isArray(leads) ? leads.length : Number(leads || 0);
+  const bookingCount = Array.isArray(bookingRequests) ? bookingRequests.length : Number(bookingRequests || 0);
+
+  return {
+    total_customers: customerCount,
+    total_leads: leadCount,
+    total_bookings: bookingCount,
+    top_questions: buildTopQuestions(faq),
+    top_categories: buildTopCategories(leads)
+  };
+}
+
 export class MemoryStorage {
   constructor() {
     this.customers = new Map();
@@ -89,10 +131,22 @@ export class MemoryStorage {
   async getPromptRules() {
     return [...this.promptRules];
   }
+
+  async getRecentLeads(limit = 10) {
+    return [...this.leads].slice(-limit).reverse();
+  }
+
+  async getRecentBookings(limit = 10) {
+    return [...this.bookingRequests].slice(-limit).reverse();
+  }
+
+  async getAdminStats() {
+    return buildAdminStats(this.customers, this.leads, this.bookingRequests, this.faq);
+  }
 }
 
 export function createMemoryStorage() {
   return new MemoryStorage();
 }
 
-export { DEFAULT_FAQ, DEFAULT_PROMPT_RULES };
+export { DEFAULT_FAQ, DEFAULT_PROMPT_RULES, buildAdminStats };

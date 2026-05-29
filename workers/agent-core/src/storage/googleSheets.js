@@ -1,4 +1,4 @@
-import { createMemoryStorage, DEFAULT_FAQ, DEFAULT_PROMPT_RULES } from "./memory.js";
+import { createMemoryStorage, DEFAULT_FAQ, DEFAULT_PROMPT_RULES, buildAdminStats } from "./memory.js";
 
 function hasGoogleSheetsConfig(env) {
   return Boolean(env?.GOOGLE_SERVICE_ACCOUNT_JSON && env?.GOOGLE_SHEET_ID);
@@ -49,6 +49,10 @@ function rowsToObjects(rows) {
       });
       return record;
     });
+}
+
+function normalizeRowCount(rows) {
+  return Array.isArray(rows) ? rows.length : 0;
 }
 
 async function importPrivateKey(pem) {
@@ -306,6 +310,40 @@ class GoogleSheetsStorage {
       return DEFAULT_PROMPT_RULES;
     }
   }
+
+  async getRecentLeads(limit = 10) {
+    const rows = await this.readTab("leads");
+    return rows.slice(-limit).reverse();
+  }
+
+  async getRecentBookings(limit = 10) {
+    const rows = await this.readTab("booking_requests");
+    return rows.slice(-limit).reverse();
+  }
+
+  async getAdminStats() {
+    const [customers, leads, bookingRequests, faq] = await Promise.all([
+      this.readTab("customers"),
+      this.readTab("leads"),
+      this.readTab("booking_requests"),
+      this.getFAQ()
+    ]);
+
+    const normalisedLeads = leads.map((lead) => ({
+      detectedIntent: lead.detectedIntent || lead.detectedintent || lead.category || "general"
+    }));
+    const customerCount = normalizeRowCount(customers);
+    const leadCount = normalizeRowCount(leads);
+    const bookingCount = normalizeRowCount(bookingRequests);
+    const stats = buildAdminStats(
+      Array.from({ length: customerCount }, (_, index) => customers[index] || {}),
+      normalisedLeads,
+      Array.from({ length: bookingCount }, (_, index) => bookingRequests[index] || {}),
+      faq
+    );
+
+    return stats;
+  }
 }
 
 class ResilientStorage {
@@ -352,6 +390,18 @@ class ResilientStorage {
 
   getPromptRules(...args) {
     return this.call("getPromptRules", ...args);
+  }
+
+  getRecentLeads(...args) {
+    return this.call("getRecentLeads", ...args);
+  }
+
+  getRecentBookings(...args) {
+    return this.call("getRecentBookings", ...args);
+  }
+
+  getAdminStats(...args) {
+    return this.call("getAdminStats", ...args);
   }
 }
 
