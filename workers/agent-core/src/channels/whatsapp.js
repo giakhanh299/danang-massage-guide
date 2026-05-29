@@ -104,10 +104,10 @@ export async function handleWhatsAppWebhook(request, env, storage, ctx) {
   };
 
   const [faq, promptRules] = await Promise.all([storage.getFAQ(), storage.getPromptRules()]);
+  const venueData = (await storage.getVenueCatalog()) || VENUE_DATA;
   configureAgentCore(env, { faq, promptRules });
 
   const history = await storage.getConversationHistory("whatsapp", parts.userId, 12);
-  const userMessagePromise = storage.saveConversationMessage("whatsapp", parts.userId, "user", parts.messageText);
   const profilePromise = storage.saveCustomerProfile({
     ...profile,
     userName: parts.userName,
@@ -120,11 +120,13 @@ export async function handleWhatsAppWebhook(request, env, storage, ctx) {
     userName: parts.userName,
     messageText: parts.messageText,
     conversationHistory: history,
-    venueData: VENUE_DATA,
+    venueData,
     customerProfile: profile
   });
+  const detectedCategory = replyPayload.detectedCategory || "general";
 
-  const assistantMessagePromise = storage.saveConversationMessage("whatsapp", parts.userId, "assistant", replyPayload.reply);
+  const userMessagePromise = storage.saveConversationMessage("whatsapp", parts.userId, "user", parts.messageText, detectedCategory);
+  const assistantMessagePromise = storage.saveConversationMessage("whatsapp", parts.userId, "assistant", replyPayload.reply, detectedCategory);
 
   if (replyPayload.leadCaptured || detectLeadIntent(parts.messageText)) {
     ctx?.waitUntil(
@@ -134,13 +136,14 @@ export async function handleWhatsAppWebhook(request, env, storage, ctx) {
         userName: parts.userName,
         message: parts.messageText,
         detectedIntent: replyPayload.detectedIntent,
+        category: detectedCategory,
         timestamp: new Date().toISOString()
       })
     );
   }
 
-  ctx?.waitUntil(userMessagePromise);
   ctx?.waitUntil(profilePromise);
+  ctx?.waitUntil(userMessagePromise);
   ctx?.waitUntil(assistantMessagePromise);
 
   const sendResult = await sendWhatsAppMessage(env, parts.phoneNumber, replyPayload.reply);

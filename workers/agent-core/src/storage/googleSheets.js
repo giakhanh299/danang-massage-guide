@@ -51,6 +51,98 @@ function rowsToObjects(rows) {
     });
 }
 
+function parseNumber(value) {
+  const numeric = Number(String(value || "").replace(/[^\d.]/g, ""));
+  return Number.isFinite(numeric) ? numeric : 0;
+}
+
+function parseTopServices(value) {
+  if (Array.isArray(value)) {
+    return value.filter(Boolean).map((item) => String(item).trim()).filter(Boolean);
+  }
+
+  return String(value || "")
+    .split(/[;,|]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function normalizeVenueCategory(value) {
+  const text = String(value || "").toLowerCase();
+  if (text.includes("massage at home") || text.includes("home")) {
+    return "massage_at_home";
+  }
+  if (text.includes("massage") || text.includes("spa")) {
+    return "massage_spa";
+  }
+  if (text.includes("karaoke") || text.includes("music box")) {
+    return "karaoke";
+  }
+  if (text.includes("seafood")) {
+    return "seafood_beer";
+  }
+  if (text.includes("bar") || text.includes("club") || text.includes("night")) {
+    return "bars_clubs";
+  }
+  return text || "general";
+}
+
+function groupVenueRows(rows) {
+  const catalog = {
+    massageSpas: [],
+    massageAtHome: null,
+    karaoke: [],
+    barsClubs: [],
+    seafoodBeer: []
+  };
+
+  for (const row of rows) {
+    const category = normalizeVenueCategory(row.category || row.Category || row.type || row.Type || "");
+    const venue = {
+      category,
+      name: row.name || row.Name || "",
+      area: row.area || row.Area || "",
+      address: row.address || row.Address || "",
+      rating: parseNumber(row.rating || row.Rating),
+      reviewCount: row.reviewCount || row.ReviewCount || "",
+      website: row.website || row.Website || "",
+      phone: row.phone || row.Phone || "",
+      openingHours: row.openingHours || row.OpeningHours || "",
+      priceRange: row.priceRange || row.PriceRange || "",
+      description: row.description || row.Description || "",
+      topServices: parseTopServices(row.topServices || row.TopServices || row.services || row.Services || "")
+    };
+
+    if (!venue.name) {
+      continue;
+    }
+
+    if (category === "massage_spa") {
+      catalog.massageSpas.push(venue);
+    } else if (category === "massage_at_home") {
+      catalog.massageAtHome = venue;
+    } else if (category === "karaoke") {
+      catalog.karaoke.push(venue);
+    } else if (category === "bars_clubs") {
+      catalog.barsClubs.push(venue);
+    } else if (category === "seafood_beer") {
+      catalog.seafoodBeer.push(venue);
+    }
+  }
+
+  return catalog;
+}
+
+const REQUIRED_TAB_COLUMNS = {
+  customers: ["userId", "channel", "userName", "areaPreference", "language", "notes", "firstSeenAt", "lastSeenAt"],
+  conversations: ["timestamp", "channel", "userId", "role", "text", "category"],
+  leads: ["timestamp", "channel", "userId", "userName", "message", "detectedIntent", "category", "page", "status"],
+  booking_requests: ["timestamp", "channel", "userId", "userName", "message", "requestedService", "requestedArea", "requestedTime", "notes", "category", "status"],
+  venues: ["category", "name", "area", "address", "rating", "reviewCount", "website", "phone", "openingHours", "priceRange", "description", "topServices"],
+  faq: ["question", "answer", "category", "sortOrder"],
+  prompt_rules: ["key", "value", "enabled"]
+};
+
 function normalizeRowCount(rows) {
   return Array.isArray(rows) ? rows.length : 0;
 }
@@ -152,10 +244,41 @@ class GoogleSheetsStorage {
     });
 
     if (!response.ok) {
-      throw new Error(`Google Sheets API error ${response.status} for ${path}`);
+      const errorText = await response.text().catch(() => "");
+      const details = errorText ? `: ${errorText}` : "";
+      throw new Error(`Google Sheets API error ${response.status} for ${path}${details}`);
     }
 
     return response;
+  }
+
+  async readHeaderRow(tabName) {
+    const response = await this.sheetsFetch(`/values/${encodeURIComponent(tabName)}!1:1`);
+    const payload = await response.json();
+    return Array.isArray(payload.values) && payload.values.length ? payload.values[0] : [];
+  }
+
+  async ensureRequiredColumns(tabName) {
+    const requiredColumns = REQUIRED_TAB_COLUMNS[tabName] || [];
+    if (!requiredColumns.length) {
+      return [];
+    }
+
+    try {
+      const headers = (await this.readHeaderRow(tabName)).map((header) => String(header || "").trim()).filter(Boolean);
+      if (!headers.length) {
+        throw new Error(`tab '${tabName}' is missing a header row`);
+      }
+
+      const missing = requiredColumns.filter((column) => !headers.includes(column));
+      if (missing.length) {
+        throw new Error(`tab '${tabName}' is missing required columns: ${missing.join(", ")}`);
+      }
+
+      return headers;
+    } catch (error) {
+      throw new Error(`Google Sheets validation failed for tab '${tabName}': ${error.message}. Required columns: ${requiredColumns.join(", ")}`);
+    }
   }
 
   async readTab(tabName) {
@@ -196,6 +319,7 @@ class GoogleSheetsStorage {
   }
 
   async saveCustomerProfile(profile) {
+    await this.ensureRequiredColumns("customers");
     const row = [
       profile.userId || "",
       profile.channel || "",
@@ -210,15 +334,17 @@ class GoogleSheetsStorage {
     return profile;
   }
 
-  async saveConversationMessage(channel, userId, role, text) {
+  async saveConversationMessage(channel, userId, role, text, category = "") {
+    await this.ensureRequiredColumns("conversations");
     const record = {
       timestamp: new Date().toISOString(),
       channel,
       userId,
       role,
-      text
+      text,
+      category
     };
-    await this.appendTab("conversations", [record.timestamp, channel, userId, role, text]);
+    await this.appendTab("conversations", [record.timestamp, channel, userId, role, text, record.category]);
     return record;
   }
 
@@ -230,11 +356,13 @@ class GoogleSheetsStorage {
       .map((row) => ({
         role: row.role || "user",
         text: row.text || "",
-        timestamp: row.timestamp || ""
+        timestamp: row.timestamp || "",
+        category: row.category || ""
       }));
   }
 
   async saveLead(lead) {
+    await this.ensureRequiredColumns("leads");
     const record = {
       ...lead,
       timestamp: lead.timestamp || new Date().toISOString()
@@ -246,6 +374,7 @@ class GoogleSheetsStorage {
       record.userName || "",
       record.message || "",
       record.detectedIntent || "",
+      record.category || "",
       record.page || "",
       record.status || "new"
     ]);
@@ -253,6 +382,7 @@ class GoogleSheetsStorage {
   }
 
   async saveBookingRequest(request) {
+    await this.ensureRequiredColumns("booking_requests");
     const record = {
       ...request,
       timestamp: request.timestamp || new Date().toISOString()
@@ -267,6 +397,7 @@ class GoogleSheetsStorage {
       record.requestedArea || "",
       record.requestedTime || "",
       record.notes || "",
+      record.category || "",
       record.status || "new"
     ]);
     return record;
@@ -311,6 +442,23 @@ class GoogleSheetsStorage {
     }
   }
 
+  async getVenueCatalog() {
+    try {
+      const rows = await this.readTab("venues");
+      const catalog = groupVenueRows(rows);
+      const hasValues =
+        catalog.massageSpas.length ||
+        catalog.massageAtHome ||
+        catalog.karaoke.length ||
+        catalog.barsClubs.length ||
+        catalog.seafoodBeer.length;
+
+      return hasValues ? catalog : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
   async getRecentLeads(limit = 10) {
     const rows = await this.readTab("leads");
     return rows.slice(-limit).reverse();
@@ -330,7 +478,8 @@ class GoogleSheetsStorage {
     ]);
 
     const normalisedLeads = leads.map((lead) => ({
-      detectedIntent: lead.detectedIntent || lead.detectedintent || lead.category || "general"
+      detectedIntent: lead.detectedIntent || lead.detectedintent || lead.category || "general",
+      category: lead.category || lead.Category || lead.detectedIntent || "general"
     }));
     const customerCount = normalizeRowCount(customers);
     const leadCount = normalizeRowCount(leads);
@@ -356,6 +505,15 @@ class ResilientStorage {
     try {
       return await this.remote[method](...args);
     } catch (error) {
+      const writeMethods = new Set([
+        "saveCustomerProfile",
+        "saveConversationMessage",
+        "saveLead",
+        "saveBookingRequest"
+      ]);
+      if (writeMethods.has(method)) {
+        throw error;
+      }
       return this.fallback[method](...args);
     }
   }
@@ -390,6 +548,10 @@ class ResilientStorage {
 
   getPromptRules(...args) {
     return this.call("getPromptRules", ...args);
+  }
+
+  getVenueCatalog(...args) {
+    return this.call("getVenueCatalog", ...args);
   }
 
   getRecentLeads(...args) {

@@ -74,10 +74,10 @@ export async function handleWebChatMessage(request, env, storage, ctx) {
   };
 
   const [faq, promptRules] = await Promise.all([storage.getFAQ(), storage.getPromptRules()]);
+  const venueData = (await storage.getVenueCatalog()) || VENUE_DATA;
   configureAgentCore(env, { faq, promptRules });
 
   const history = await storage.getConversationHistory("webchat", userId, 12);
-  const userMessagePromise = storage.saveConversationMessage("webchat", userId, "user", messageText);
   const profilePromise = storage.saveCustomerProfile({
     ...profile,
     userName,
@@ -90,11 +90,13 @@ export async function handleWebChatMessage(request, env, storage, ctx) {
     userName,
     messageText,
     conversationHistory: history,
-    venueData: VENUE_DATA,
+    venueData,
     customerProfile: profile
   });
+  const detectedCategory = replyPayload.detectedCategory || "general";
 
-  const assistantMessagePromise = storage.saveConversationMessage("webchat", userId, "assistant", replyPayload.reply);
+  const userMessagePromise = storage.saveConversationMessage("webchat", userId, "user", messageText, detectedCategory);
+  const assistantMessagePromise = storage.saveConversationMessage("webchat", userId, "assistant", replyPayload.reply, detectedCategory);
 
   if (replyPayload.leadCaptured || detectLeadIntent(messageText)) {
     ctx?.waitUntil(
@@ -104,14 +106,15 @@ export async function handleWebChatMessage(request, env, storage, ctx) {
         userName,
         message: messageText,
         detectedIntent: replyPayload.detectedIntent,
+        category: detectedCategory,
         page,
         timestamp: new Date().toISOString()
       })
     );
   }
 
-  ctx?.waitUntil(userMessagePromise);
   ctx?.waitUntil(profilePromise);
+  ctx?.waitUntil(userMessagePromise);
   ctx?.waitUntil(assistantMessagePromise);
 
   return jsonResponse({

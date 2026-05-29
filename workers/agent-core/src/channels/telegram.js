@@ -2,29 +2,6 @@ import { VENUE_DATA } from "../data/venues.js";
 import { configureAgentCore, generateAgentReply, detectLeadIntent } from "../agent.js";
 import { checkRateLimit } from "../utils/rateLimit.js";
 
-function getCommandMessage(text) {
-  const command = String(text || "").trim().split(/\s+/)[0].toLowerCase();
-
-  switch (command) {
-    case "/start":
-      return "Welcome the user and explain that you help with massage, spa, massage at home, karaoke, bars, seafood, nightlife, and local tips in Da Nang. Keep it short and friendly.";
-    case "/help":
-      return "Explain how to ask for recommendations and list the supported topics. Keep it concise.";
-    case "/massage":
-      return "Recommend up to 3 massage and spa options in Da Nang. Use area and reason. Remind the user to verify on Google Maps.";
-    case "/karaoke":
-      return "Recommend up to 3 karaoke venues in Da Nang. Use area and reason. Remind the user to verify on Google Maps.";
-    case "/bars":
-      return "Recommend up to 3 bars and clubs in Da Nang. Use area and reason. Remind the user to verify on Google Maps.";
-    case "/seafood":
-      return "Recommend up to 3 seafood and beer spots in Da Nang. Use area and reason. Remind the user to verify on Google Maps.";
-    case "/book":
-      return "The user wants booking support now. Ask for service, area, and preferred time in one short reply.";
-    default:
-      return text;
-  }
-}
-
 function getMessageParts(update) {
   const message = update.message || update.edited_message || update.channel_post;
   if (!message || !message.text) {
@@ -65,13 +42,14 @@ async function sendTelegramMessage(env, chatId, text) {
   return response.json();
 }
 
-function buildBookingRequestPayload(parts, reply, detectedIntent) {
+function buildBookingRequestPayload(parts, reply, detectedIntent, detectedCategory = "general") {
   return {
     channel: "telegram",
     userId: parts.userId,
     userName: parts.userName,
     message: parts.messageText,
     detectedIntent,
+    category: detectedCategory,
     page: "telegram/webhook",
     status: "new",
     requestedService: detectedIntent,
@@ -163,6 +141,7 @@ export async function handleTelegramWebhook(request, env, storage, ctx) {
   }
 
   const [faq, promptRules] = await Promise.all([storage.getFAQ(), storage.getPromptRules()]);
+  const venueData = (await storage.getVenueCatalog()) || VENUE_DATA;
   configureAgentCore(env, { faq, promptRules });
 
   if (command === "/stats" || command === "/leads" || command === "/bookings") {
@@ -185,14 +164,14 @@ export async function handleTelegramWebhook(request, env, storage, ctx) {
       reply = formatRecentRows(
         "Recent leads:",
         leads,
-        (row) => `${row.timestamp || "unknown"} | ${row.channel || "unknown"} | ${row.userName || row.userId || "unknown"} | ${row.detectedIntent || "general"} | ${row.message || ""}`
+        (row) => `${row.timestamp || "unknown"} | ${row.channel || "unknown"} | ${row.userName || row.userId || "unknown"} | ${row.category || row.detectedIntent || "general"} | ${row.message || ""}`
       );
     } else {
       const bookings = await storage.getRecentBookings(10);
       reply = formatRecentRows(
         "Recent bookings:",
         bookings,
-        (row) => `${row.timestamp || "unknown"} | ${row.channel || "unknown"} | ${row.userName || row.userId || "unknown"} | ${row.requestedService || row.detectedIntent || "booking"} | ${row.requestedArea || ""}`
+        (row) => `${row.timestamp || "unknown"} | ${row.channel || "unknown"} | ${row.userName || row.userId || "unknown"} | ${row.category || row.requestedService || row.detectedIntent || "booking"} | ${row.requestedArea || ""}`
       );
     }
 
@@ -202,10 +181,18 @@ export async function handleTelegramWebhook(request, env, storage, ctx) {
     });
   }
 
-  const commandMessage = getCommandMessage(parts.messageText);
   const history = await storage.getConversationHistory("telegram", parts.userId, 12);
-
-  const userMessagePromise = storage.saveConversationMessage("telegram", parts.userId, "user", parts.messageText);
+  const commandIntentMap = {
+    "/start": "start",
+    "/help": "help",
+    "/massage": "massage",
+    "/massage-at-home": "massage at home",
+    "/karaoke": "karaoke",
+    "/bars": "bars",
+    "/seafood": "seafood",
+    "/book": "booking"
+  };
+  const intentHint = commandIntentMap[command] || "";
   const profilePromise = storage.saveCustomerProfile({
     ...profile,
     userName: parts.userName,
@@ -216,13 +203,16 @@ export async function handleTelegramWebhook(request, env, storage, ctx) {
     channel: "telegram",
     userId: parts.userId,
     userName: parts.userName,
-    messageText: commandMessage,
+    messageText: parts.messageText,
     conversationHistory: history,
-    venueData: VENUE_DATA,
-    customerProfile: profile
+    venueData,
+    customerProfile: profile,
+    intentHint
   });
+  const detectedCategory = replyPayload.detectedCategory || "general";
+  const userMessagePromise = storage.saveConversationMessage("telegram", parts.userId, "user", parts.messageText, detectedCategory);
 
-  const assistantMessagePromise = storage.saveConversationMessage("telegram", parts.userId, "assistant", replyPayload.reply);
+  const assistantMessagePromise = storage.saveConversationMessage("telegram", parts.userId, "assistant", replyPayload.reply, detectedCategory);
 
   if (replyPayload.leadCaptured || detectLeadIntent(parts.messageText)) {
     const leadPromise = storage.saveLead({
@@ -231,13 +221,14 @@ export async function handleTelegramWebhook(request, env, storage, ctx) {
       userName: parts.userName,
       message: parts.messageText,
       detectedIntent: replyPayload.detectedIntent,
+      category: detectedCategory,
       timestamp: new Date().toISOString()
     });
     ctx?.waitUntil(leadPromise);
   }
 
   if (replyPayload.detectedIntent === "booking" || command === "/book") {
-    ctx?.waitUntil(storage.saveBookingRequest(buildBookingRequestPayload(parts, replyPayload.reply, replyPayload.detectedIntent)));
+    ctx?.waitUntil(storage.saveBookingRequest(buildBookingRequestPayload(parts, replyPayload.reply, replyPayload.detectedIntent, detectedCategory)));
   }
 
   ctx?.waitUntil(userMessagePromise);

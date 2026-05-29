@@ -35,7 +35,7 @@ function buildTopCategories(leads, limit = 5) {
   const counts = new Map();
 
   for (const lead of leads) {
-    const key = String(lead.detectedIntent || "general");
+    const key = String(lead.category || lead.detectedIntent || "general");
     counts.set(key, (counts.get(key) || 0) + 1);
   }
 
@@ -93,13 +93,14 @@ export class MemoryStorage {
     return next;
   }
 
-  async saveConversationMessage(channel, userId, role, text) {
+  async saveConversationMessage(channel, userId, role, text, category = "") {
     const record = {
       timestamp: new Date().toISOString(),
       channel,
       userId,
       role,
-      text
+      text,
+      category
     };
     this.conversations.push(record);
     return record;
@@ -109,7 +110,7 @@ export class MemoryStorage {
     return this.conversations
       .filter((entry) => entry.channel === channel && entry.userId === userId)
       .slice(-limit)
-      .map((entry) => ({ role: entry.role, text: entry.text, timestamp: entry.timestamp }));
+      .map((entry) => ({ role: entry.role, text: entry.text, timestamp: entry.timestamp, category: entry.category || "" }));
   }
 
   async saveLead(lead) {
@@ -130,6 +131,10 @@ export class MemoryStorage {
 
   async getPromptRules() {
     return [...this.promptRules];
+  }
+
+  async getVenueCatalog() {
+    return null;
   }
 
   async getRecentLeads(limit = 10) {
