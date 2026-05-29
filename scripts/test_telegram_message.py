@@ -6,7 +6,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from urllib.request import Request, urlopen
+from urllib.request import ProxyHandler, Request, build_opener
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,7 +26,8 @@ def http_json(url: str, method: str = "GET", body: dict | None = None) -> tuple[
     data = None if body is None else json.dumps(body).encode("utf-8")
     request = Request(url, data=data, method=method)
     request.add_header("Content-Type", "application/json")
-    with urlopen(request, timeout=60) as response:
+    opener = build_opener(ProxyHandler({}))
+    with opener.open(request, timeout=60) as response:
         payload = response.read().decode("utf-8")
         return response.status, json.loads(payload) if payload else {}
 

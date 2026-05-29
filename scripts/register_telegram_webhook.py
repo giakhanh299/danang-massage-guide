@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 import sys
 from urllib.parse import urlencode
-from urllib.request import Request, urlopen
+from urllib.request import ProxyHandler, Request, build_opener
 
 
 TARGET_PATH = "/telegram/webhook"
@@ -24,7 +24,8 @@ def main() -> int:
     request = Request(api_url, data=payload, method="POST")
     request.add_header("Content-Type", "application/x-www-form-urlencoded")
 
-    with urlopen(request, timeout=60) as response:
+    opener = build_opener(ProxyHandler({}))
+    with opener.open(request, timeout=60) as response:
         print(response.read().decode("utf-8"))
 
     return 0

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import sys
-from urllib.request import Request, urlopen
+from urllib.request import ProxyHandler, Request, build_opener
 
 
 def main() -> int:
@@ -14,7 +14,8 @@ def main() -> int:
     api_url = f"https://api.telegram.org/bot{token}/getWebhookInfo"
     request = Request(api_url, method="GET")
 
-    with urlopen(request, timeout=60) as response:
+    opener = build_opener(ProxyHandler({}))
+    with opener.open(request, timeout=60) as response:
         payload = response.read().decode("utf-8")
 
     import json

@@ -292,6 +292,7 @@ export async function generateAgentReply({
   customerProfile = null
 }) {
   const categoryHint = detectIntent(messageText);
+  const leadIntent = detectLeadIntent(messageText);
   const venueMatches = getVenueMatches(messageText, venueData, 3);
 
   const systemPrompt = buildSystemPrompt({
@@ -332,9 +333,9 @@ export async function generateAgentReply({
   return {
     reply,
     suggestedActions,
-    detectedIntent: parsed?.detectedIntent || categoryHint,
-    leadCaptured: Boolean(parsed?.leadCaptured || detectLeadIntent(messageText) || categoryHint === "booking"),
-    leadReason: parsed?.leadReason || (detectLeadIntent(messageText) ? "keyword_match" : ""),
+    detectedIntent: parsed?.detectedIntent || (leadIntent ? "booking" : categoryHint),
+    leadCaptured: Boolean(parsed?.leadCaptured || leadIntent || categoryHint === "booking"),
+    leadReason: parsed?.leadReason || (leadIntent ? "keyword_match" : ""),
     venueMatches
   };
 }
