@@ -54,6 +54,11 @@ function notFound() {
   );
 }
 
+function logWorkerError(error, context = "") {
+  const stack = error instanceof Error ? error.stack || error.message : String(error);
+  console.error(context ? `${context}: ${stack}` : stack);
+}
+
 function getRuntimeConfigFlags(env) {
   return {
     telegramConfigured: Boolean(env?.TELEGRAM_BOT_TOKEN),
@@ -64,58 +69,75 @@ function getRuntimeConfigFlags(env) {
 
 export default {
   async fetch(request, env, ctx) {
-    configureAgentCore(env);
-    const url = new URL(request.url);
-    const storage = createStorage(env);
-    const runtimeFlags = getRuntimeConfigFlags(env);
+    try {
+      const url = new URL(request.url);
+      const runtimeFlags = getRuntimeConfigFlags(env);
 
-    if (!globalThis.__AGENT_CORE_DIAGNOSTICS_LOGGED) {
-      console.log("agent-core diagnostics", runtimeFlags);
-      globalThis.__AGENT_CORE_DIAGNOSTICS_LOGGED = true;
-    }
-
-    if (request.method === "OPTIONS") {
-      return jsonResponse(null, 204);
-    }
-
-    if (request.method === "GET" && url.pathname === "/health") {
-      return jsonResponse({ status: "ok" });
-    }
-
-    if (request.method === "GET" && url.pathname === "/debug/config") {
-      return jsonResponse(runtimeFlags);
-    }
-
-    if (request.method === "GET" && url.pathname === "/admin/stats") {
-      if (!isAuthorizedAdminRequest(request, env)) {
-        return jsonResponse({ ok: false, error: "Unauthorized" }, 401);
+      if (!globalThis.__AGENT_CORE_DIAGNOSTICS_LOGGED) {
+        console.log("agent-core diagnostics", runtimeFlags);
+        globalThis.__AGENT_CORE_DIAGNOSTICS_LOGGED = true;
       }
 
-      const stats = await storage.getAdminStats();
-      return jsonResponse(stats);
-    }
+      if (request.method === "OPTIONS") {
+        return jsonResponse(null, 204);
+      }
 
-    if (request.method === "GET" && url.pathname === "/") {
-      return jsonResponse({
-        ok: true,
-        service: "agent-core",
-        channels: ["telegram", "whatsapp", "webchat"],
-        storage: storage.constructor?.name || "storage"
-      });
-    }
+      if (request.method === "GET" && url.pathname === "/health") {
+        return jsonResponse({ status: "ok" });
+      }
 
-    if (url.pathname === "/telegram/webhook" && request.method === "POST") {
-      return handleTelegramWebhook(request, env, storage, ctx);
-    }
+      if (request.method === "GET" && url.pathname === "/debug/config") {
+        return jsonResponse(runtimeFlags);
+      }
 
-    if (url.pathname === "/whatsapp/webhook") {
-      return handleWhatsAppWebhook(request, env, storage, ctx);
-    }
+      if (request.method === "GET" && url.pathname === "/") {
+        return jsonResponse({
+          ok: true,
+          service: "agent-core",
+          channels: ["telegram", "whatsapp", "webchat"],
+          storage: "lazy"
+        });
+      }
 
-    if (url.pathname === "/webchat/message") {
-      return handleWebChatMessage(request, env, storage, ctx);
-    }
+      if (request.method === "GET" && url.pathname === "/admin/stats") {
+        if (!isAuthorizedAdminRequest(request, env)) {
+          return jsonResponse({ ok: false, error: "Unauthorized" }, 401);
+        }
 
-    return notFound();
+        configureAgentCore(env);
+        const storage = createStorage(env);
+        const stats = await storage.getAdminStats();
+        return jsonResponse(stats);
+      }
+
+      if (url.pathname === "/telegram/webhook" && request.method === "POST") {
+        configureAgentCore(env);
+        const storage = createStorage(env);
+        return await handleTelegramWebhook(request, env, storage, ctx);
+      }
+
+      if (url.pathname === "/whatsapp/webhook") {
+        configureAgentCore(env);
+        const storage = createStorage(env);
+        return await handleWhatsAppWebhook(request, env, storage, ctx);
+      }
+
+      if (url.pathname === "/webchat/message") {
+        configureAgentCore(env);
+        const storage = createStorage(env);
+        return await handleWebChatMessage(request, env, storage, ctx);
+      }
+
+      return notFound();
+    } catch (error) {
+      logWorkerError(error, "agent-core request failed");
+      return jsonResponse(
+        {
+          ok: false,
+          error: "Internal Server Error"
+        },
+        500
+      );
+    }
   }
 };
