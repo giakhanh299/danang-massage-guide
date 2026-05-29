@@ -352,6 +352,21 @@ p {
   font-size: 1.08rem;
 }
 
+.button-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  flex: 0 0 auto;
+}
+
+.button-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .hero-actions,
 .review-links,
 .stack-actions,
@@ -376,6 +391,38 @@ p {
   display: grid;
   gap: 0.65rem;
   margin-top: 1.25rem;
+}
+
+.support-card {
+  margin-top: 1.25rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(23, 55, 46, 0.1);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.support-card p:last-child {
+  margin-bottom: 0;
+}
+
+.support-channels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-bottom: 0.85rem;
+}
+
+.channel-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid rgba(23, 55, 46, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--brand);
+  font-size: 0.9rem;
+  font-weight: 800;
 }
 
 .hero-points li,
@@ -781,21 +828,39 @@ p {
   font-size: 0.92rem;
 }
 
-.floating-chat {
+.floating-contact {
   position: fixed;
   right: 1rem;
   bottom: 1rem;
   z-index: 40;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.floating-contact-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.6rem;
   min-height: 3.3rem;
-  padding: 0.95rem 1.2rem;
+  padding: 0.95rem 1.1rem;
   border-radius: 999px;
+  font-weight: 800;
+  box-shadow: 0 20px 40px rgba(23, 55, 46, 0.18);
+}
+
+.floating-contact-link-whatsapp {
   background: linear-gradient(135deg, var(--success), #46b67f);
   color: #f8fff9;
-  font-weight: 800;
-  box-shadow: 0 20px 40px rgba(31, 139, 90, 0.28);
+}
+
+.floating-contact-link-telegram {
+  background: linear-gradient(135deg, #2c8fd8, #45b3ea);
+  color: #f8fcff;
+}
+
+.floating-contact-link span:last-child {
+  white-space: nowrap;
 }
 
 .reveal {
