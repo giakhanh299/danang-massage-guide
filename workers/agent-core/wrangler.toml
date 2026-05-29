@@ -1,0 +1,13 @@
+name = "agent-core"
+main = "src/index.js"
+compatibility_date = "2026-05-29"
+
+[observability]
+enabled = true
+head_sampling_rate = 1
+
+[vars]
+OPENAI_MODEL = "gpt-5.2"
+SITE_URL = "https://danang-massage-guide.pages.dev/"
+TELEGRAM_GROUP_URL = "https://t.me/danangmassagebooking"
+WHATSAPP_SUPPORT_URL = "https://chat.whatsapp.com/Bzeox4jUrZdBQFWaLS20l3"
