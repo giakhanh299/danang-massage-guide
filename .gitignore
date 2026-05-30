@@ -1,3 +1,4 @@
 .wrangler/
 runtime/google_sheet_templates/
 **/__pycache__/
+workers/agent-core/sheet_service_account.json
