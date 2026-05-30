@@ -2,3 +2,9 @@
 runtime/google_sheet_templates/
 **/__pycache__/
 workers/agent-core/sheet_service_account.json
+assets/images/da-nang-karaoke.webp
+assets/images/da-nang-massage-spa.webp
+assets/images/da-nang-nightlife.webp
+assets/images/da-nang-seafood.webp
+assets/images/my-khe-beach-evening.webp
+assets/images/da-nang-karaoke.converted.webp

@@ -26,6 +26,39 @@ const SECONDARY_NAV_KEYS = new Set([
   "contact"
 ]);
 
+const LISTING_IMAGE_CONFIG = {
+  spa: {
+    src: "assets/images/da-nang-massage-spa.jpg",
+    alt: "Relaxing massage spa interior in Da Nang",
+    width: 1600,
+    height: 1068
+  },
+  karaoke: {
+    src: "assets/images/da-nang-karaoke.jpg",
+    alt: "Private karaoke room in Da Nang",
+    width: 1600,
+    height: 2400
+  },
+  barsclubs: {
+    src: "assets/images/da-nang-nightlife.jpg",
+    alt: "Nightlife bar interior in Da Nang",
+    width: 1600,
+    height: 2399
+  },
+  seafoodbeer: {
+    src: "assets/images/da-nang-seafood.jpg",
+    alt: "Seafood dinner in Da Nang",
+    width: 1600,
+    height: 2400
+  },
+  home: {
+    src: "assets/images/my-khe-beach-evening.jpg",
+    alt: "My Khe Beach evening view in Da Nang",
+    width: 1600,
+    height: 2400
+  }
+};
+
 function normalizeNavHref(href) {
   return String(href || "")
     .trim()
@@ -65,6 +98,19 @@ function buildMapsUrl(name, address) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
 }
 
+function getListingImageConfig(sourceKey = "listing", item = {}) {
+  const normalizedKey = String(sourceKey || "listing").toLowerCase();
+  const fallbackKey = normalizedKey === "listing" ? "home" : normalizedKey;
+  return item.imageUrl
+    ? {
+        src: item.imageUrl,
+        alt: item.imageAlt || item.name || item.officialName || "Da Nang travel photo",
+        width: Number(item.imageWidth || 1600),
+        height: Number(item.imageHeight || 1200)
+      }
+    : LISTING_IMAGE_CONFIG[fallbackKey] || LISTING_IMAGE_CONFIG.home;
+}
+
 function applyConfiguredLinks(root = document) {
   root.querySelectorAll("[data-link-key]").forEach((element) => {
     const key = element.dataset.linkKey;
@@ -86,7 +132,11 @@ function applyConfiguredLinks(root = document) {
 function injectInsiderGuideFunnel(root = document) {
   const nav = root.querySelector(".site-nav");
 
-  if (nav && !nav.querySelector('a[href="insider-guide.html"]')) {
+  const hasInsiderGuide = nav
+    ? Array.from(nav.querySelectorAll("a[href]")).some((link) => normalizeNavHref(link.getAttribute("href")) === "insider-guide")
+    : false;
+
+  if (nav && !hasInsiderGuide) {
     const insiderGuideLink = root.createElement("a");
     insiderGuideLink.setAttribute("href", "insider-guide.html");
     insiderGuideLink.textContent = "Insider Guide";
@@ -180,13 +230,13 @@ function renderSpaCard(spa) {
   const area = spa.area || "Da Nang";
   const rating = Number(spa.googleRating);
   const reviewCount = formatCount(spa.reviewCount);
+  const image = getListingImageConfig("spa", spa);
 
   return `
     <article class="spotlight-card">
-      <div class="photo-placeholder">
-        <span>${escapeHtml(spa.imageLabel || "Future Spa Photo")}</span>
-        <p>${escapeHtml(spa.imageDescription || spa.officialName)}</p>
-      </div>
+      <figure class="spotlight-media">
+        <img src="${escapeHtml(image.src)}" alt="${escapeHtml(spa.imageAlt || image.alt || spa.officialName)}" width="${escapeHtml(image.width)}" height="${escapeHtml(image.height)}" loading="lazy" decoding="async">
+      </figure>
       <span class="spotlight-badge">${escapeHtml(area)}</span>
       <h3>${escapeHtml(spa.officialName)}</h3>
       <p class="spotlight-area"><strong>Area:</strong> ${escapeHtml(area)}</p>
@@ -205,12 +255,13 @@ function renderSpaCard(spa) {
   `;
 }
 
-function renderListingCard(item, kind) {
+function renderListingCard(item, kind, sourceKey = "") {
   const area = item.area || "Da Nang";
   const mapsUrl = item.mapsUrl || buildMapsUrl(item.name, item.address);
   const rating = typeof item.rating === "number" ? formatRating(item.rating) : item.rating || "";
   const reviewCount = formatReviewCount(item.reviews);
   const websiteUrl = item.website || "";
+  const image = getListingImageConfig(sourceKey || kind, item);
 
   if (kind === "spa") {
     return renderSpaCard(item);
@@ -218,6 +269,9 @@ function renderListingCard(item, kind) {
 
   return `
     <article class="spotlight-card">
+      <figure class="spotlight-media">
+        <img src="${escapeHtml(image.src)}" alt="${escapeHtml(item.imageAlt || image.alt || item.name || "Da Nang travel photo")}" width="${escapeHtml(image.width)}" height="${escapeHtml(image.height)}" loading="lazy" decoding="async">
+      </figure>
       <span class="spotlight-badge">${escapeHtml(area)}</span>
       <h3>${escapeHtml(item.name || "")}</h3>
       <p class="spotlight-area"><strong>Area:</strong> ${escapeHtml(area)}</p>
@@ -274,7 +328,7 @@ async function renderDataDrivenGrids() {
       const limit = Number(grid.dataset.listingLimit || 0);
       const subset = limit > 0 ? items.slice(0, limit) : items;
 
-      grid.innerHTML = subset.map((item) => renderListingCard(item, kind)).join("");
+      grid.innerHTML = subset.map((item) => renderListingCard(item, kind, sourceKey)).join("");
       applyConfiguredLinks(grid);
     }
   } catch (error) {
