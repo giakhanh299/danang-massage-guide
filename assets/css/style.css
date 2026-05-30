@@ -196,27 +196,28 @@ p {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  min-height: 4.5rem;
+  gap: 0.7rem;
+  min-height: 4.15rem;
 }
 
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.5rem;
   min-width: 0;
 }
 
 .brand-mark {
   display: grid;
   place-items: center;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 1.9rem;
+  height: 1.9rem;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--brand), #295545);
   color: #f7f2e6;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
+  font-size: 0.72rem;
 }
 
 .brand-copy {
@@ -227,11 +228,12 @@ p {
 }
 
 .brand-copy strong {
-  font-size: 0.9rem;
+  font-size: 0.82rem;
+  line-height: 1.05;
 }
 
 .brand-copy span {
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   color: var(--text-soft);
 }
 
@@ -1081,20 +1083,20 @@ p {
   }
 
   .header-shell {
-    min-height: 4.25rem;
+    min-height: 3.9rem;
   }
 
   .brand {
-    gap: 0.55rem;
+    gap: 0.45rem;
   }
 
   .brand-mark {
-    width: 2.75rem;
-    height: 2.75rem;
+    width: 2.1rem;
+    height: 2.1rem;
   }
 
   .brand-copy strong {
-    font-size: 0.88rem;
+    font-size: 0.8rem;
   }
 
   .brand-copy span {
@@ -1122,8 +1124,8 @@ p {
   }
 
   .site-nav a {
-    padding: 0.55rem 0.76rem;
-    font-size: 0.84rem;
+    padding: 0.48rem 0.68rem;
+    font-size: 0.79rem;
     white-space: nowrap;
   }
 
@@ -1132,8 +1134,8 @@ p {
   }
 
   .nav-more > summary {
-    padding: 0.55rem 0.76rem;
-    font-size: 0.84rem;
+    padding: 0.48rem 0.68rem;
+    font-size: 0.79rem;
   }
 
   .nav-more[open] > .nav-more-panel {
@@ -1167,8 +1169,8 @@ p {
   }
 
   .site-nav [data-link-key="whatsapp"] {
-    min-height: 2.45rem;
-    padding: 0.55rem 0.82rem;
+    min-height: 2.2rem;
+    padding: 0.45rem 0.72rem;
   }
 }
 
@@ -1205,20 +1207,20 @@ p {
 
 @media (max-width: 859px) {
   .header-shell {
-    min-height: 4rem;
+    min-height: 3.7rem;
   }
 
   .brand {
-    gap: 0.5rem;
+    gap: 0.4rem;
   }
 
   .brand-mark {
-    width: 2.25rem;
-    height: 2.25rem;
+    width: 1.8rem;
+    height: 1.8rem;
   }
 
   .brand-copy strong {
-    font-size: 0.84rem;
+    font-size: 0.76rem;
   }
 
   .brand-copy span {
