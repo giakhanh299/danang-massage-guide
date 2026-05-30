@@ -63,8 +63,19 @@ function getRuntimeConfigFlags(env) {
   return {
     telegramConfigured: Boolean(env?.TELEGRAM_BOT_TOKEN),
     openaiConfigured: Boolean(env?.OPENAI_API_KEY),
-    sheetsConfigured: Boolean(env?.GOOGLE_SERVICE_ACCOUNT_JSON && env?.GOOGLE_SHEET_ID)
+    sheetsConfigured: Boolean(env?.GOOGLE_SERVICE_ACCOUNT_JSON && env?.GOOGLE_SHEET_ID),
+    localAgentConfigured: Boolean(env?.LOCAL_AGENT_API_URL && env?.AGENT_SHARED_SECRET)
   };
+}
+
+function isValidTelegramWebhookSecret(request, env) {
+  const configuredSecret = String(env?.TELEGRAM_WEBHOOK_SECRET || "").trim();
+  if (!configuredSecret) {
+    return true;
+  }
+
+  const providedSecret = String(request.headers.get("x-telegram-bot-api-secret-token") || "").trim();
+  return providedSecret === configuredSecret;
 }
 
 export default {
@@ -111,6 +122,10 @@ export default {
       }
 
       if (url.pathname === "/telegram/webhook" && request.method === "POST") {
+        if (!isValidTelegramWebhookSecret(request, env)) {
+          return jsonResponse({ ok: false, error: "Unauthorized" }, 401);
+        }
+
         configureAgentCore(env);
         const storage = createStorage(env);
         return await handleTelegramWebhook(request, env, storage, ctx);

@@ -68,6 +68,103 @@ function buildRateLimitReply() {
   ].join("\n");
 }
 
+function buildTaskHelpReply() {
+  return [
+    "Telegram task commands:",
+    "/task <text> - send a new Codex task",
+    "/status - check the latest task status",
+    "/last - view the latest commit",
+    "/help - show this message",
+    "",
+    "For quick help, join: https://t.me/danangmassagebooking"
+  ].join("\n");
+}
+
+function buildTaskStatusReply(statusPayload) {
+  const status = statusPayload?.status || "unknown";
+  const taskId = statusPayload?.taskId || "unknown";
+  const updatedAt = statusPayload?.updatedAt || "unknown";
+  const lastCommit = statusPayload?.lastCommitHash || statusPayload?.commitHash || "";
+  const lastMessage = statusPayload?.lastCommitMessage || statusPayload?.commitMessage || "";
+
+  return [
+    `Status: ${status}`,
+    `Task ID: ${taskId}`,
+    `Updated: ${updatedAt}`,
+    lastCommit ? `Last commit: ${lastCommit}` : "Last commit: none",
+    lastMessage ? `Message: ${lastMessage}` : "",
+    "",
+    "For quick help, join: https://t.me/danangmassagebooking"
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+function buildTaskAcceptedReply(result, taskText) {
+  const taskId = result?.taskId || result?.id || "pending";
+  return [
+    "Task accepted.",
+    `Task ID: ${taskId}`,
+    `Summary: ${taskText.slice(0, 160)}`,
+    "",
+    "Status will update in /status and /last.",
+    "For quick help, join: https://t.me/danangmassagebooking"
+  ].join("\n");
+}
+
+function buildLastReply(statusPayload) {
+  const lastCommit = statusPayload?.lastCommitHash || statusPayload?.commitHash || "none";
+  const lastMessage = statusPayload?.lastCommitMessage || statusPayload?.commitMessage || "none";
+  const status = statusPayload?.status || "unknown";
+
+  return [
+    `Status: ${status}`,
+    `Last commit: ${lastCommit}`,
+    `Message: ${lastMessage}`,
+    "",
+    "For quick help, join: https://t.me/danangmassagebooking"
+  ].join("\n");
+}
+
+function isTaskControlCommand(command) {
+  return ["/task", "/status", "/last", "/help"].includes(command);
+}
+
+function isAllowedTaskUser(env, userId) {
+  const allowed = String(env.TELEGRAM_ALLOWED_USER_ID || "").trim();
+  if (!allowed) {
+    return true;
+  }
+
+  return allowed === String(userId);
+}
+
+async function callLocalAgentApi(env, path, payload = null) {
+  const baseUrl = String(env.LOCAL_AGENT_API_URL || "").trim();
+  if (!baseUrl) {
+    throw new Error("LOCAL_AGENT_API_URL is not configured");
+  }
+
+  const targetUrl = new URL(path, baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`);
+  const headers = {
+    "Content-Type": "application/json",
+    "X-Agent-Secret": String(env.AGENT_SHARED_SECRET || "")
+  };
+
+  const response = await fetch(targetUrl.toString(), {
+    method: payload ? "POST" : "GET",
+    headers,
+    body: payload ? JSON.stringify(payload) : undefined
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Local agent API ${path} failed: ${response.status} ${body}`);
+  }
+
+  return response.json();
+}
+
 function isAdminUser(env, userId) {
   const raw = String(env.TELEGRAM_ADMIN_IDS || env.TELEGRAM_ADMIN_USER_IDS || "");
   const ids = raw
@@ -118,18 +215,102 @@ export async function handleTelegramWebhook(request, env, storage, ctx) {
     });
   }
 
-  const profile = (await storage.getCustomerProfile(parts.userId, "telegram")) || {
-    userId: parts.userId,
-    channel: "telegram",
-    userName: parts.userName,
-    areaPreference: "",
-    language: "en",
-    notes: "",
-    firstSeenAt: new Date().toISOString(),
-    lastSeenAt: new Date().toISOString()
-  };
-
   const command = String(parts.messageText || "").trim().split(/\s+/)[0].toLowerCase();
+  if (isTaskControlCommand(command)) {
+    if (!isAllowedTaskUser(env, parts.userId)) {
+      const reply = "This command is restricted to the allowed Telegram user.";
+      await sendTelegramMessage(env, parts.chatId, reply);
+      return new Response(JSON.stringify({ ok: false, unauthorized: true }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    if (command === "/help") {
+      const reply = buildTaskHelpReply();
+      await sendTelegramMessage(env, parts.chatId, reply);
+      return new Response(JSON.stringify({ ok: true, help: true }), {
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    if (command === "/status") {
+      try {
+        const statusPayload = await callLocalAgentApi(env, "/status");
+        const reply = buildTaskStatusReply(statusPayload);
+        await sendTelegramMessage(env, parts.chatId, reply);
+        return new Response(JSON.stringify({ ok: true, status: statusPayload }), {
+          headers: { "Content-Type": "application/json" }
+        });
+      } catch (error) {
+        const reply = "Unable to read the latest task status right now.";
+        await sendTelegramMessage(env, parts.chatId, reply);
+        return new Response(JSON.stringify({ ok: false, error: "status unavailable" }), {
+          status: 502,
+          headers: { "Content-Type": "application/json" }
+        });
+      }
+    }
+
+    if (command === "/last") {
+      try {
+        const statusPayload = await callLocalAgentApi(env, "/last");
+        const reply = buildLastReply(statusPayload);
+        await sendTelegramMessage(env, parts.chatId, reply);
+        return new Response(JSON.stringify({ ok: true, last: statusPayload }), {
+          headers: { "Content-Type": "application/json" }
+        });
+      } catch (error) {
+        const reply = "Unable to read the latest commit right now.";
+        await sendTelegramMessage(env, parts.chatId, reply);
+        return new Response(JSON.stringify({ ok: false, error: "last unavailable" }), {
+          status: 502,
+          headers: { "Content-Type": "application/json" }
+        });
+      }
+    }
+
+    const taskText = String(parts.messageText || "").replace(/^\/task(\s+)?/i, "").trim();
+    if (!taskText) {
+      const reply = [
+        "Send a task with:",
+        "/task <your request>",
+        "",
+        "For quick help, join: https://t.me/danangmassagebooking"
+      ].join("\n");
+      await sendTelegramMessage(env, parts.chatId, reply);
+      return new Response(JSON.stringify({ ok: false, error: "task text required" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    try {
+      const accepted = await callLocalAgentApi(env, "/task", {
+        channel: "telegram",
+        userId: parts.userId,
+        userName: parts.userName,
+        chatId: parts.chatId,
+        messageText: taskText,
+        rawCommand: parts.messageText,
+        source: "telegram"
+      });
+
+      const reply = buildTaskAcceptedReply(accepted, taskText);
+      await sendTelegramMessage(env, parts.chatId, reply);
+      return new Response(JSON.stringify({ ok: true, accepted }), {
+        headers: { "Content-Type": "application/json" }
+      });
+    } catch (error) {
+      const reply = "Task could not be forwarded to the local agent.";
+      await sendTelegramMessage(env, parts.chatId, reply);
+      return new Response(JSON.stringify({ ok: false, error: "task forwarding failed" }), {
+        status: 502,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+  }
+
   const rateLimit = checkRateLimit(`telegram:${parts.userId}`, { limit: 10, windowMs: 300000 });
   if (!rateLimit.allowed) {
     const reply = buildRateLimitReply();
@@ -143,6 +324,16 @@ export async function handleTelegramWebhook(request, env, storage, ctx) {
   const [faq, promptRules] = await Promise.all([storage.getFAQ(), storage.getPromptRules()]);
   const venueData = (await storage.getVenueCatalog()) || VENUE_DATA;
   configureAgentCore(env, { faq, promptRules });
+  const profile = (await storage.getCustomerProfile(parts.userId, "telegram")) || {
+    userId: parts.userId,
+    channel: "telegram",
+    userName: parts.userName,
+    areaPreference: "",
+    language: "en",
+    notes: "",
+    firstSeenAt: new Date().toISOString(),
+    lastSeenAt: new Date().toISOString()
+  };
 
   if (command === "/stats" || command === "/leads" || command === "/bookings") {
     if (!isAdminUser(env, parts.userId)) {

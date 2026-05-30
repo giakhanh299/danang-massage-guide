@@ -1,5 +1,9 @@
 .wrangler/
 runtime/google_sheet_templates/
+runtime/tasks/
+runtime/telegram_task_status.json
+runtime/telegram_last_commit.json
+CODEX_TASK_FROM_TELEGRAM.txt
 **/__pycache__/
 workers/agent-core/sheet_service_account.json
 assets/images/da-nang-karaoke.webp
