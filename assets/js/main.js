@@ -20,6 +20,12 @@ const EXTERNAL_LINK_KEYS = new Set([
   "tripadvisor"
 ]);
 
+const SECONDARY_NAV_HREFS = [
+  "things-to-do-after-massage.html",
+  "insider-guide.html",
+  "contact.html"
+];
+
 function escapeHtml(value) {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -107,6 +113,45 @@ function injectInsiderGuideFunnel(root = document) {
   `;
 
   footer.parentNode.insertBefore(banner, footer);
+}
+
+function compactPrimaryNavigation(root = document) {
+  const nav = root.querySelector(".site-nav");
+  if (!nav) {
+    return;
+  }
+
+  let moreDetails = nav.querySelector(".nav-more");
+  if (!moreDetails) {
+    moreDetails = root.createElement("details");
+    moreDetails.className = "nav-more";
+    moreDetails.innerHTML = `
+      <summary class="nav-more-summary">More</summary>
+      <div class="nav-more-panel" aria-label="Secondary navigation"></div>
+    `;
+  }
+
+  const panel = moreDetails.querySelector(".nav-more-panel");
+
+  SECONDARY_NAV_HREFS.forEach((href) => {
+    const link = nav.querySelector(`a[href="${href}"]`);
+    if (link) {
+      panel.appendChild(link);
+    }
+  });
+
+  if (!panel.childElementCount) {
+    moreDetails.remove();
+    return;
+  }
+
+  if (!nav.contains(moreDetails)) {
+    const whatsappButton = nav.querySelector('[data-link-key="whatsapp"]');
+    nav.insertBefore(moreDetails, whatsappButton || null);
+  }
+
+  const isMobile = window.matchMedia("(max-width: 859px)").matches;
+  moreDetails.open = isMobile;
 }
 
 function renderSpaCard(spa) {
@@ -219,6 +264,7 @@ async function renderDataDrivenGrids() {
 }
 
 injectInsiderGuideFunnel();
+compactPrimaryNavigation();
 applyConfiguredLinks();
 renderDataDrivenGrids();
 
@@ -228,12 +274,20 @@ document.querySelectorAll("[data-current-year]").forEach((element) => {
 
 const navToggle = document.querySelector(".nav-toggle");
 const siteNav = document.querySelector(".site-nav");
+const navBreakpoint = window.matchMedia("(max-width: 859px)");
 
 if (navToggle && siteNav) {
   navToggle.addEventListener("click", () => {
     const isOpen = siteNav.classList.toggle("is-open");
     navToggle.setAttribute("aria-expanded", String(isOpen));
+    compactPrimaryNavigation();
   });
+}
+
+if (typeof navBreakpoint.addEventListener === "function") {
+  navBreakpoint.addEventListener("change", compactPrimaryNavigation);
+} else if (typeof navBreakpoint.addListener === "function") {
+  navBreakpoint.addListener(compactPrimaryNavigation);
 }
 
 const currentPage = window.location.pathname.split("/").pop() || "index.html";
