@@ -20,11 +20,20 @@ const EXTERNAL_LINK_KEYS = new Set([
   "tripadvisor"
 ]);
 
-const SECONDARY_NAV_HREFS = [
-  "things-to-do-after-massage.html",
-  "insider-guide.html",
-  "contact.html"
-];
+const SECONDARY_NAV_KEYS = new Set([
+  "things-to-do-after-massage",
+  "insider-guide",
+  "contact"
+]);
+
+function normalizeNavHref(href) {
+  return String(href || "")
+    .trim()
+    .replace(/^https?:\/\/[^/]+/i, "")
+    .replace(/\/+$/g, "")
+    .replace(/^\/+/, "")
+    .replace(/\.html$/i, "");
+}
 
 function escapeHtml(value) {
   return String(value)
@@ -132,10 +141,15 @@ function compactPrimaryNavigation(root = document) {
   }
 
   const panel = moreDetails.querySelector(".nav-more-panel");
+  const links = Array.from(nav.querySelectorAll("a[href]"));
 
-  SECONDARY_NAV_HREFS.forEach((href) => {
-    const link = nav.querySelector(`a[href="${href}"]`);
-    if (link) {
+  links.forEach((link) => {
+    if (link.closest(".nav-more") || link.matches('[data-link-key="whatsapp"]')) {
+      return;
+    }
+
+    const normalizedHref = normalizeNavHref(link.getAttribute("href"));
+    if (SECONDARY_NAV_KEYS.has(normalizedHref)) {
       panel.appendChild(link);
     }
   });
@@ -151,7 +165,14 @@ function compactPrimaryNavigation(root = document) {
   }
 
   const isMobile = window.matchMedia("(max-width: 859px)").matches;
-  moreDetails.open = isMobile;
+  if (isMobile) {
+    moreDetails.open = true;
+  } else {
+    moreDetails.open = false;
+    if (!nav.contains(moreDetails)) {
+      nav.insertBefore(moreDetails, nav.querySelector('[data-link-key="whatsapp"]') || null);
+    }
+  }
 }
 
 function renderSpaCard(spa) {

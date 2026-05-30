@@ -336,6 +336,10 @@ p {
   display: flex;
 }
 
+.nav-more:not([open]) > .nav-more-panel {
+  display: none;
+}
+
 .hero,
 .page-hero {
   position: relative;
@@ -1152,6 +1156,10 @@ p {
     flex-direction: column;
   }
 
+  .nav-more:not([open]) > .nav-more-panel {
+    display: none !important;
+  }
+
   .hero {
     padding: 4rem 0 3rem;
   }
@@ -1243,6 +1251,10 @@ p {
 
   .nav-more[open] > .nav-more-panel {
     padding-left: 0.3rem;
+  }
+
+  .nav-more:not([open]) > .nav-more-panel {
+    display: none;
   }
 
   .site-nav [data-link-key="whatsapp"] {
