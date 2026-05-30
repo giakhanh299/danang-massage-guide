@@ -3,42 +3,57 @@
     {
       "name": "Queen Palace Karaoke Da Nang",
       "area": "Cam Le",
-      "address": "179 Xo Viet Nghe Tinh, Da Nang",
+      "address": "179 Xo Viet Nghe Tinh, Khue Trung, Cam Le, Da Nang 550000, Vietnam",
       "rating": 4.9,
-      "reviews": "1278+",
+      "reviews": "1.1K",
       "type": "Karaoke bar",
       "description": "Premium karaoke venue with private rooms, suitable for groups and celebrations.",
-      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Queen%20Palace%20Karaoke%20Da%20Nang%20179%20Xo%20Viet%20Nghe%20Tinh"
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Queen%20Palace%20Karaoke%20Da%20Nang%20179%20Xo%20Viet%20Nghe%20Tinh",
+      "website": "https://queenkaraoke.com.vn/",
+      "phone": "+84 911 225 229",
+      "imageUrl": "assets/images/venues/queen-palace-karaoke-da-nang.svg",
+      "imageAlt": "Queen Palace Karaoke Da Nang image"
     },
     {
       "name": "BMW Korean Karaoke Da Nang",
       "area": "An Hai",
-      "address": "29-31 Le Van Quy, Da Nang",
+      "address": "29-31 Le Van Quy, An Hai, Son Tra, Da Nang 550000, Vietnam",
       "rating": 4.7,
-      "reviews": "207+",
+      "reviews": 40,
       "type": "Korean-style karaoke",
       "description": "Korean-style karaoke option for travelers looking for private-room entertainment.",
-      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=BMW%20Korean%20Karaoke%20Da%20Nang%2029-31%20Le%20Van%20Quy"
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=BMW%20Korean%20Karaoke%20Da%20Nang%2029-31%20Le%20Van%20Quy",
+      "website": "https://www.vdnbmw.com/booking",
+      "phone": "+82 10 7347 6220",
+      "imageUrl": "assets/images/venues/bmw-korean-karaoke-da-nang.svg",
+      "imageAlt": "BMW Korean Karaoke Da Nang image"
     },
     {
       "name": "NEW Eden Karaoke Da Nang",
       "area": "Hoa Cuong",
-      "address": "Duy Tan, Hoa Cuong, Da Nang",
-      "rating": 4.9,
-      "reviews": "603+",
+      "address": "5 Duy Tan, Hoa Cuong Bac, Hai Chau, Da Nang 550000, Vietnam",
+      "rating": null,
+      "reviews": null,
       "type": "Karaoke bar",
-      "description": "Popular karaoke option with strong visibility among Korean visitors.",
-      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=NEW%20Eden%20Karaoke%20Da%20Nang%20Duy%20Tan%20Hoa%20Cuong"
+      "description": "Popular karaoke option with private-room style entertainment in the central hotel zone.",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=NEW%20Eden%20Karaoke%20Da%20Nang%20Duy%20Tan%20Hoa%20Cuong",
+      "manualReview": true,
+      "imageUrl": "assets/images/venues/new-eden-karaoke-da-nang.svg",
+      "imageAlt": "NEW Eden Karaoke Da Nang image"
     },
     {
       "name": "NooRe Box Music Box and Mart",
       "area": "Hai Chau",
-      "address": "36 Ba Dinh, Da Nang",
-      "rating": 4.9,
-      "reviews": "493+",
+      "address": "36 Ba Dinh, Thach Thang, Hai Chau, Da Nang 550000, Vietnam",
+      "rating": null,
+      "reviews": null,
       "type": "Music box / video karaoke",
       "description": "Budget-friendly music box and karaoke-style venue for small groups.",
-      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=NooRe%20Box%20Music%20Box%20and%20Mart%2036%20Ba%20Dinh%20Da%20Nang"
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=NooRe%20Box%20Music%20Box%20and%20Mart%2036%20Ba%20Dinh%20Da%20Nang",
+      "manualReview": true,
+      "phone": "+84 383 589 872",
+      "imageUrl": "assets/images/venues/noore-box-music-box-and-mart.svg",
+      "imageAlt": "NooRe Box Music Box and Mart image"
     }
   ]
 }

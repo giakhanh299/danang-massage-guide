@@ -78,14 +78,27 @@ function escapeHtml(value) {
 }
 
 function formatCount(value) {
+  if (value === null || value === undefined || value === "") {
+    return "";
+  }
+
   return new Intl.NumberFormat("en-US").format(Number(value));
 }
 
 function formatRating(value) {
-  return Number(value).toFixed(1);
+  if (value === null || value === undefined || value === "") {
+    return "";
+  }
+
+  const number = Number(value);
+  return Number.isFinite(number) ? number.toFixed(1) : "";
 }
 
 function formatReviewCount(value) {
+  if (value === null || value === undefined || value === "") {
+    return "";
+  }
+
   if (typeof value === "string") {
     return value;
   }
@@ -228,9 +241,12 @@ function compactPrimaryNavigation(root = document) {
 function renderSpaCard(spa) {
   const services = Array.isArray(spa.topServices) ? spa.topServices : [];
   const area = spa.area || "Da Nang";
-  const rating = Number(spa.googleRating);
+  const rating = formatRating(spa.googleRating);
   const reviewCount = formatCount(spa.reviewCount);
   const image = getListingImageConfig("spa", spa);
+  const ratingLine = rating
+    ? `<p class="rating-line"><strong>Rating:</strong> ${escapeHtml(rating)} / 5${reviewCount ? ` from ${escapeHtml(reviewCount)} reviews` : ""}</p>`
+    : `<p class="rating-line"><strong>Rating:</strong> Verify on Google Maps</p>`;
 
   return `
     <article class="spotlight-card">
@@ -241,11 +257,12 @@ function renderSpaCard(spa) {
       <h3>${escapeHtml(spa.officialName)}</h3>
       <p class="spotlight-area"><strong>Area:</strong> ${escapeHtml(area)}</p>
       <p class="spotlight-subline">${escapeHtml(spa.address || "")}</p>
-      <p class="rating-line"><strong>Rating:</strong> ${escapeHtml(formatRating(rating))} / 5 from ${reviewCount} reviews</p>
+      ${ratingLine}
       <p class="spotlight-meta"><strong>Hours:</strong> ${escapeHtml(spa.openingHours || "Check before visiting")}</p>
       <p class="price-line"><strong>Price range:</strong> ${escapeHtml(spa.priceRange || "")}</p>
       <p>${escapeHtml(spa.description || "")}</p>
       ${services.length ? `<ul class="tag-list">${services.map((service) => `<li>${escapeHtml(service)}</li>`).join("")}</ul>` : ""}
+      ${spa.manualReview ? `<p class="fine-print">Verify hours, rating, and review count on Google Maps before visiting.</p>` : ""}
       <div class="card-actions">
         <a class="button button-secondary button-small" href="${escapeHtml(spa.mapsUrl || "#")}" target="_blank" rel="noopener noreferrer">Google Maps</a>
         ${spa.website ? `<a class="button button-secondary button-small" href="${escapeHtml(spa.website)}" target="_blank" rel="noopener noreferrer">Website</a>` : ""}
@@ -258,10 +275,13 @@ function renderSpaCard(spa) {
 function renderListingCard(item, kind, sourceKey = "") {
   const area = item.area || "Da Nang";
   const mapsUrl = item.mapsUrl || buildMapsUrl(item.name, item.address);
-  const rating = typeof item.rating === "number" ? formatRating(item.rating) : item.rating || "";
+  const rating = formatRating(item.rating);
   const reviewCount = formatReviewCount(item.reviews);
   const websiteUrl = item.website || "";
   const image = getListingImageConfig(sourceKey || kind, item);
+  const ratingLine = rating
+    ? `<p class="rating-line"><strong>Rating:</strong> ${escapeHtml(rating)} / 5${reviewCount ? ` from ${escapeHtml(reviewCount)} reviews` : ""}</p>`
+    : `<p class="rating-line"><strong>Rating:</strong> Verify on Google Maps</p>`;
 
   if (kind === "spa") {
     return renderSpaCard(item);
@@ -276,9 +296,10 @@ function renderListingCard(item, kind, sourceKey = "") {
       <h3>${escapeHtml(item.name || "")}</h3>
       <p class="spotlight-area"><strong>Area:</strong> ${escapeHtml(area)}</p>
       <p class="spotlight-subline">${escapeHtml(item.address || "")}</p>
-      <p class="rating-line"><strong>Rating:</strong> ${escapeHtml(rating)} / 5 from ${escapeHtml(reviewCount)} reviews</p>
+      ${ratingLine}
       <p class="spotlight-meta"><strong>Type:</strong> ${escapeHtml(item.type || "")}</p>
       <p>${escapeHtml(item.description || "")}</p>
+      ${item.manualReview ? `<p class="fine-print">Exact review counts or hours should be verified on Google Maps before visiting.</p>` : ""}
       <div class="card-actions">
         <a class="button button-secondary button-small" href="${escapeHtml(mapsUrl)}" target="_blank" rel="noopener noreferrer">Google Maps</a>
         ${websiteUrl ? `<a class="button button-secondary button-small" href="${escapeHtml(websiteUrl)}" target="_blank" rel="noopener noreferrer">Website</a>` : ""}
